@@ -1,0 +1,1654 @@
+
+#### Sintaxe
+
+Qual a utilidade de funções?
+Abstrair funcionalidade
+Reutilização de código
+func (receiver) identifier(parameters) (returns) { code }
+A diferença entre parâmetros e argumentos:
+Funções são definidas com parâmetros
+Funções são chamadas com argumentos
+Tudo em Go é pass by value.
+Pass by reference, pass by copy, ... não.
+Parâmetro pode ser ...variádico.
+Exemplos:
+Função básica. 
+Go Playground: https://play.golang.org/p/FebJblBenP
+
+
+Função que aceita um argumento.
+Go Playground:
+        https://play.golang.org/p/CE6Ij3U4QB
+
+
+Função com retorno.
+Go Playground: https://play.golang.org/p/gKxwYe6btP
+
+
+Função com múltiplos retornos e parâmetro variádico.
+Go Playground: https://play.golang.org/p/OcQ1wXwM2c
+Mais um: https://play.golang.org/p/8wc2TA9xH_
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 2. Desenrolando (enumerando) uma slice
+
+Quando temos uma slice, podemos passar os elementos individuais através "deste..." operador.
+Exemplos:
+Desenrolando uma slice de ints com como argumento para a função "soma" anterior
+Go Playground: https://play.golang.org/p/k8O3__8UDa
+
+
+Pode-se passar zero ou mais valores
+Go Playground: https://play.golang.org/p/C238I9n7Vs
+
+
+O parâmetro variádico deve ser o parâmetro final → ref/spec#Passing_arguments_to_..._parameters
+Go Playground: https://play.golang.org/p/8wc2TA9xH_
+Não roda: https://play.golang.org/p/2qTAnLWfgB
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 
+Funções – 3. Defer
+
+Funções são ótimas pois tornam nosso código modular. Podemos alterar partes do nosso programa sem afetar o resto!
+Uma declaração defer chama uma função cuja execução ocorrerá no momento em que a função da qual ela faz parte finalizar.
+Essa finalização pode ocorrer devido a um return, ao fim do code block da função, ou no caso de pânico em uma goroutine correspondente.
+"Deixa pra última hora!"
+ref/spec
+Sempre usamos para fechar um arquivo após abri-lo.
+
+Go Playground: https://play.golang.org/p/sFj8arw0E_
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 4. Métodos
+
+Um método é uma função anexada a um tipo, método adicona funcionalidade especificamente a um type
+Quando se anexa uma função a um tipo, ela se torna um método desse tipo.
+Pode-se anexar uma função a um tipo utilizando seu receiver.
+Utilização: valor.método()
+Exemplo: o tipo "pessoa" pode ter um método oibomdia()
+Go Playground: https://go.dev/play/p/SVyzChOSeKY
+
+Em Go (Golang), métodos são funções que estão associadas a um tipo específico, como uma struct ou um tipo definido pelo usuário. Eles permitem que você defina comportamentos específicos para esses tipos, semelhante à orientação a objetos em outras linguagens.
+
+Vamos explorar como métodos funcionam em Go:
+
+Definindo um método
+Para definir um método em Go, você precisa:
+
+Associar o método a um tipo (geralmente uma struct).
+
+Especificar um receptor (receiver) entre a palavra-chave func e o nome do método.
+
+A sintaxe geral é:
+
+go
+Copy
+func (receptor Tipo) NomeDoMetodo(parametros) tipoDeRetorno {
+    // Corpo do método
+}
+Exemplo básico
+Aqui está um exemplo simples de um método associado a uma struct:
+
+go
+Copy
+package main
+
+import "fmt"
+
+// Definindo uma struct
+type Retangulo struct {
+    Largura float64
+    Altura  float64
+}
+
+// Método para calcular a área do retângulo
+func (r Retangulo) Area() float64 {
+    return r.Largura * r.Altura
+}
+
+func main() {
+    // Criando uma instância de Retangulo
+    ret := Retangulo{Largura: 10, Altura: 5}
+
+    // Chamando o método Area
+    fmt.Println("Área do retângulo:", ret.Area())
+}
+Saída:
+
+Copy
+Área do retângulo: 50
+Explicação:
+O método Area está associado ao tipo Retangulo.
+
+O receptor (r Retangulo) permite que o método acesse os campos da struct (Largura e Altura).
+
+Receptores: Valor vs Ponteiro
+Em Go, os métodos podem ter receptores de valor ou de ponteiro. Isso afeta como o método interage com a struct.
+
+1. Receptor de valor
+Uma cópia da struct é passada para o método.
+
+Modificações feitas no método não afetam a struct original.
+
+Exemplo:
+
+go
+Copy
+func (r Retangulo) SetLargura(novaLargura float64) {
+    r.Largura = novaLargura // Isso não afeta a struct original
+}
+2. Receptor de ponteiro
+Um ponteiro para a struct é passado para o método.
+
+Modificações feitas no método afetam a struct original.
+
+Exemplo:
+
+go
+Copy
+func (r *Retangulo) SetLargura(novaLargura float64) {
+    r.Largura = novaLargura // Isso afeta a struct original
+}
+Exemplo com receptor de ponteiro
+Aqui está um exemplo que usa um receptor de ponteiro para modificar a struct original:
+
+go
+Copy
+package main
+
+import "fmt"
+
+type Retangulo struct {
+    Largura float64
+    Altura  float64
+}
+
+// Método com receptor de ponteiro
+func (r *Retangulo) SetLargura(novaLargura float64) {
+    r.Largura = novaLargura
+}
+
+func main() {
+    ret := Retangulo{Largura: 10, Altura: 5}
+    fmt.Println("Largura antes:", ret.Largura)
+
+    // Modificando a largura usando o método
+    ret.SetLargura(20)
+    fmt.Println("Largura depois:", ret.Largura)
+}
+Saída:
+
+Copy
+Largura antes: 10
+Largura depois: 20
+Métodos para tipos não-struct
+Em Go, você também pode definir métodos para tipos que não são structs, desde que o tipo seja definido no mesmo pacote.
+
+Exemplo:
+
+go
+Copy
+package main
+
+import "fmt"
+
+// Definindo um tipo personalizado
+type MeuInt int
+
+// Método para o tipo MeuInt
+func (m MeuInt) Dobro() MeuInt {
+    return m * 2
+}
+
+func main() {
+    num := MeuInt(5)
+    fmt.Println("Dobro de", num, "é", num.Dobro())
+}
+Saída:
+
+Copy
+Dobro de 5 é 10
+Métodos vs Funções
+Métodos: Estão associados a um tipo específico e têm um receptor.
+
+Funções: São independentes e não estão associadas a nenhum tipo.
+
+Exemplo de função equivalente ao método Area:
+
+
+func Area(r Retangulo) float64 {
+    return r.Largura * r.Altura
+}
+Resumo
+Métodos são funções associadas a um tipo (struct ou tipo personalizado).
+
+O receptor define o tipo ao qual o método pertence.
+
+Receptores podem ser de valor (cópia) ou de ponteiro (referência).
+
+Métodos permitem adicionar comportamentos específicos a tipos.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 5. Interfaces & polimorfismo
+
+Em Go, valores podem ter mais que um tipo.
+Uma interface permite que um valor tenha mais que um tipo.
+
+Declaração: keyword identifier type → type x interface
+
+Após declarar a interface, deve-se definir os métodos necessários para implementar essa interface.
+Se um tipo possuir todos os métodos necessários (que, no caso da interface{}, pode ser nenhum) então esse tipo implicitamente implementa a interface.
+Esse tipo será o seu tipo e também o tipo da interface.
+
+Exemplos:
+Os tipos profissão1 e profissão2 contem o tipo pessoa
+Cada um tem seu método oibomdia()*, e podem dar oi utilizando *pessoa.oibomdia()
+Implementam a interface gente
+Ambos podem acessar o função serhumano() que chama o método oibomdia() de cada gente
+Tambem podemos no método serhumano() tomar ações diferentes dependendo do tipo:
+        switch pessoa.(type) { case profissão1: fmt.Println(h.(profissão1).valorquesóexisteemprofissão1) [...] }* 
+Go Playground pré-pronto: https://play.golang.org/p/VLbo_1uE-U
+
+https://play.golang.org/p/zGKr7cvTPF
+
+Go Playground ao vivo:
+    https://play.golang.org/p/njiKbTT20Cr
+    
+Onde se utiliza?
+Área de formas geométricas (gobyexample.com)
+Sort
+DB
+Writer interface: arquivos locais, http request/resp
+
+outro exemplo - https://go.dev/play/p/LRFd75a2os9
+
+outro exemplo - https://go.dev/play/p/XLmQZaCm9Gv
+
+
+link aula:
+- https://youtu.be/2zTENBJTlD0?list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg
+
+MAIS DETALHADO :
+
+Em Go (Golang), interfaces e polimorfismo são conceitos poderosos que permitem criar código flexível e reutilizável. 
+Vamos explorar como eles funcionam:
+
+Interfaces
+Uma interface em Go é um tipo que define um conjunto de métodos. Qualquer tipo que implemente esses métodos implementa implicitamente a interface.
+ Go não tem herança clássica, mas as interfaces permitem um comportamento semelhante ao polimorfismo.
+
+Sintaxe de uma interface:
+
+type NomeDaInterface interface {
+    Metodo1(parametros) tipoDeRetorno
+    Metodo2(parametros) tipoDeRetorno
+}
+Exemplo básico de interface
+Aqui está um exemplo simples de uma interface Forma com um método Area():
+
+////////////
+package main
+
+import (
+    "fmt"
+    "math"
+)
+
+// Definindo a interface
+type Forma interface {
+    Area() float64
+}
+
+// Definindo uma struct para um Círculo
+type Circulo struct {
+    Raio float64
+}
+
+// Implementando o método Area para Circulo
+func (c Circulo) Area() float64 {
+    return math.Pi * c.Raio * c.Raio
+}
+
+// Definindo uma struct para um Retângulo
+type Retangulo struct {
+    Largura float64
+    Altura  float64
+}
+
+// Implementando o método Area para Retangulo
+func (r Retangulo) Area() float64 {
+    return r.Largura * r.Altura
+}
+
+// Função que usa a interface Forma
+func imprimirArea(f Forma) {
+    fmt.Printf("A área da forma é %.2f\n", f.Area())
+}
+
+func main() {
+    // Criando instâncias de Circulo e Retangulo
+    circ := Circulo{Raio: 5}
+    ret := Retangulo{Largura: 10, Altura: 5}
+
+    // Usando a função imprimirArea com diferentes formas
+    imprimirArea(circ)
+    imprimirArea(ret)
+}
+Saída:
+
+Copy
+A área da forma é 78.54
+A área da forma é 50.00
+Explicação:
+A interface Forma define um método Area().
+
+Tanto Circulo quanto Retangulo implementam o método Area(), então eles implementam implicitamente a interface Forma.
+
+A função imprimirArea aceita qualquer tipo que implemente a interface Forma, demonstrando polimorfismo.
+
+Polimorfismo
+O polimorfismo em Go é alcançado através de interfaces. Ele permite que você trate diferentes tipos de forma uniforme, 
+desde que implementem a mesma interface.
+
+No exemplo acima:
+
+Circulo e Retangulo são tipos diferentes, mas ambos implementam a interface Forma.
+
+A função imprimirArea pode aceitar qualquer um desses tipos, pois eles satisfazem a interface Forma.
+
+Interface vazia (interface{})
+A interface vazia (interface{}) não tem métodos, o que significa que qualquer tipo a implementa. Isso é útil quando você precisa de 
+flexibilidade para trabalhar com tipos desconhecidos ou variados.
+
+Exemplo:
+
+
+func imprimirValor(valor interface{}) {
+    fmt.Println(valor)
+}
+
+func main() {
+    imprimirValor(42)         // int
+    imprimirValor("Olá")      // string
+    imprimirValor(3.14)       // float64
+}
+Saída:
+
+Copy
+42
+Olá
+3.14
+Type Assertion
+Quando você trabalha com interfaces (especialmente interface{}), pode ser necessário extrair o valor subjacente de um tipo específico. Isso é feito com type assertion.
+
+Exemplo:
+
+
+func descobrirTipo(valor interface{}) {
+    switch v := valor.(type) {
+    case int:
+        fmt.Println("É um int:", v)
+    case string:
+        fmt.Println("É uma string:", v)
+    default:
+        fmt.Println("Tipo desconhecido")
+    }
+}
+
+func main() {
+    descobrirTipo(42)
+    descobrirTipo("Olá")
+    descobrirTipo(3.14)
+}
+Saída:
+
+Copy
+É um int: 42
+É uma string: Olá
+Tipo desconhecido
+Composição de interfaces
+Em Go, você pode compor interfaces para criar novas interfaces. Isso permite combinar comportamentos de várias interfaces.
+
+Exemplo:
+
+
+type Leitor interface {
+    Ler() string
+}
+
+type Escritor interface {
+    Escrever(texto string)
+}
+
+// Composição de interfaces
+type LeitorEscritor interface {
+    Leitor
+    Escritor
+}
+Qualquer tipo que implemente Ler() e Escrever() automaticamente implementa LeitorEscritor.
+
+Resumo
+Interfaces definem um conjunto de métodos que um tipo deve implementar.
+
+Polimorfismo é alcançado quando diferentes tipos implementam a mesma interface.
+
+Interface vazia (interface{}) permite trabalhar com qualquer tipo.
+
+Type assertion é usado para extrair o valor subjacente de uma interface.
+
+Composição de interfaces permite combinar comportamentos de várias interfaces.
+
+Interfaces e polimorfismo são fundamentais para escrever código flexível e reutilizável em Go.
+Eles permitem que você crie abstrações poderosas sem depender de herança complexa. 😊
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 6. Funções anônimas
+
+
+Anonymous self-executing functions → Funções anônimas auto-executáveis.
+func(p params) { ... }()
+Vamos ver bastante quando falarmos de goroutines.
+Go Playground: https://play.golang.org/p/Rnqmo6X6jh 
+
+Em Go (ou Golang), funções anônimas são funções que não possuem um nome associado a elas. 
+Elas são úteis quando você precisa definir uma função rapidamente, sem a necessidade de declará-la formalmente com um nome.
+Funções anônimas são frequentemente usadas em situações onde você precisa passar uma função como argumento para outra função ou quando você quer definir uma função diretamente no local onde ela será usada.
+
+Sintaxe básica
+A sintaxe para uma função anônima em Go é a seguinte:
+
+
+func(parâmetros) tipo_de_retorno {
+    // corpo da função
+}
+
+Exemplo 2: Passando uma função anônima como argumento
+Funções anônimas podem ser passadas como argumentos para outras funções. Aqui está um exemplo onde uma função anônima é passada para a função fmt.Println:
+
+
+package main
+
+import "fmt"
+
+func main() {
+    // Passando uma função anônima como argumento
+    fmt.Println(func() string {
+        return "Olá, mundo!"
+    }())
+}
+Neste exemplo, a função anônima retorna uma string que é passada diretamente para fmt.Println.
+
+
+
+Exemplo 3: Atribuindo uma função anônima a uma variável
+Você também pode atribuir uma função anônima a uma variável e chamá-la posteriormente:
+
+
+package main
+
+import "fmt"
+
+func main() {
+    // Atribuindo uma função anônima a uma variável
+    saudacao := func() {
+        fmt.Println("Olá, mundo!")
+    }
+
+    // Chamando a função anônima através da variável
+    saudacao()
+}
+Neste exemplo, a função anônima é atribuída à variável saudacao, que pode ser chamada como uma função normal.
+
+
+
+Exemplo 4: Função anônima com parâmetros
+Funções anônimas também podem receber parâmetros:
+
+
+package main
+
+import "fmt"
+
+func main() {
+    // Função anônima com parâmetros
+    soma := func(a, b int) int {
+        return a + b
+    }
+
+    resultado := soma(3, 4)
+    fmt.Println("Resultado da soma:", resultado)
+}
+Neste exemplo, a função anônima recebe dois parâmetros inteiros e retorna a soma deles.
+
+
+
+Exemplo 5: Função anônima em uma goroutine
+Funções anônimas são frequentemente usadas em goroutines para executar código concorrentemente:
+
+
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    // Função anônima em uma goroutine
+    go func() {
+        fmt.Println("Executando em uma goroutine")
+    }()
+
+    // Dando tempo para a goroutine executar
+    time.Sleep(1 * time.Second)
+    fmt.Println("Função main terminando")
+}
+Neste exemplo, a função anônima é executada em uma goroutine separada, permitindo que o código seja executado concorrentemente com a função main.
+
+Conclusão
+Funções anônimas em Go são uma ferramenta poderosa e flexível que permite definir funções rapidamente e usá-las em contextos onde uma função formal não é necessária.
+ Elas são especialmente úteis em situações como callbacks, goroutines, e quando você precisa de uma função temporária ou de curta duração.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 7. Func como expressão
+
+f := func(p params){ ... }
+f()
+Go Playground: https://play.golang.org/p/cPxhPUbfLy
+
+
+Em Go, funções são cidadãos de primeira classe, o que significa que você pode tratá-las como qualquer outro valor.
+ Isso inclui atribuir funções a variáveis, passá-las como argumentos para outras funções, retorná-las de funções e até mesmo definir funções como expressões. Quando falamos de "função como expressão", 
+ estamos nos referindo à capacidade de definir uma função diretamente como parte de uma expressão, sem precisar declará-la com um nome.
+
+O que é uma função como expressão?
+Uma função como expressão é basicamente uma função anônima que pode ser usada diretamente em um contexto onde uma expressão é esperada.
+ Isso permite que você crie funções "on-the-fly" e as use imediatamente.
+
+Exemplo básico de função como expressão
+Aqui está um exemplo simples de como você pode usar uma função como expressão:
+
+
+package main
+
+import "fmt"
+
+func main() {
+    // Atribuindo uma função anônima (expressão) a uma variável
+    soma := func(a, b int) int {
+        return a + b
+    }
+
+    // Usando a função armazenada na variável
+    resultado := soma(3, 4)
+    fmt.Println("Resultado da soma:", resultado) // Resultado: 7
+}
+Neste exemplo:
+
+A função anônima func(a, b int) int é definida como uma expressão.
+
+Ela é atribuída à variável soma.
+
+A variável soma pode ser chamada como uma função normal.
+
+
+Passando funções como argumentos
+Uma função como expressão pode ser passada diretamente como argumento para outra função. Isso é comum em funções de alta ordem, como map, filter, etc. 
+(embora Go não tenha essas funções built-in, você pode implementá-las).
+
+Aqui está um exemplo:
+
+
+package main
+
+import "fmt"
+
+// Função que aceita outra função como argumento
+func aplicarFuncao(a, b int, funcao func(int, int) int) int {
+    return funcao(a, b)
+}
+
+func main() {
+    // Passando uma função como expressão
+    resultado := aplicarFuncao(5, 3, func(x, y int) int {
+        return x * y
+    })
+
+    fmt.Println("Resultado da multiplicação:", resultado) // Resultado: 15
+}
+Neste exemplo:
+
+A função aplicarFuncao recebe uma função como terceiro argumento.
+
+Passamos uma função anônima func(x, y int) int diretamente como argumento.
+
+
+
+Retornando funções como expressão
+Você também pode retornar uma função como expressão de outra função. Isso é útil para criar closures (funções que capturam variáveis do contexto em que foram definidas).
+
+Aqui está um exemplo:
+
+
+package main
+
+import "fmt"
+
+// Função que retorna outra função
+func criarMultiplicador(fator int) func(int) int {
+    return func(x int) int {
+        return x * fator
+    }
+}
+
+func main() {
+    // Criando uma função multiplicadora
+    dobrar := criarMultiplicador(2)
+    triplicar := criarMultiplicador(3)
+
+    // Usando as funções retornadas
+    fmt.Println("Dobrar 5:", dobrar(5))      // Resultado: 10
+    fmt.Println("Triplicar 5:", triplicar(5)) // Resultado: 15
+}
+Neste exemplo:
+
+A função criarMultiplicador retorna uma função anônima que multiplica um número pelo fator passado.
+
+As funções dobrar e triplicar são criadas chamando criarMultiplicador com diferentes fatores.
+
+
+
+Função como expressão em goroutines
+Funções como expressão também são úteis em goroutines, onde você pode definir uma função diretamente no local onde ela será executada de forma concorrente.
+
+Aqui está um exemplo:
+
+
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    // Executando uma função como expressão em uma goroutine
+    go func() {
+        fmt.Println("Executando em uma goroutine")
+    }()
+
+    // Dando tempo para a goroutine executar
+    time.Sleep(1 * time.Second)
+    fmt.Println("Função main terminando")
+}
+Neste exemplo:
+
+A função anônima é definida e executada imediatamente em uma goroutine.
+
+O time.Sleep é usado para garantir que a goroutine tenha tempo de executar antes do programa terminar.
+
+Resumo
+Função como expressão é uma função anônima que pode ser usada diretamente em um contexto onde uma expressão é esperada.
+
+Ela pode ser atribuída a variáveis, passada como argumento para outras funções, retornada de funções ou usada em goroutines.
+
+Isso torna o código mais conciso e flexível, especialmente em situações onde você precisa de uma função temporária ou específica para um contexto.
+
+
+Essa abordagem é uma das características poderosas de Go, permitindo que você escreva código funcional e modular de maneira eficiente.
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 8. Retornando uma função
+
+Pode-se usar uma função como retorno de uma função
+Declaração: func f() return
+Exemplo: func f() func() int { [...]; return func() int{ return [int] } }
+????: fmt.Println(f()())
+Go Playground: https://play.golang.org/p/zPjoWNrCJF
+
+Em Go, é possível retornar uma função de outra função. Isso é uma característica poderosa da linguagem, que permite criar funções de alta ordem,
+ closures e implementar padrões como fábricas de funções ou decoradores. Quando uma função retorna outra função, a função retornada pode "capturar" variáveis do contexto em que foi criada, 
+ o que é conhecido como closure.
+
+Como funciona?
+Uma função pode retornar outra função como seu valor de retorno.
+
+A função retornada pode ser chamada posteriormente.
+
+A função retornada pode acessar e "lembrar" variáveis do escopo onde foi definida (closure).
+
+Exemplo básico: Retornando uma função
+Aqui está um exemplo simples de uma função que retorna outra função:
+
+
+package main
+
+import "fmt"
+
+// Função que retorna uma função
+func criarSaudacao(saudacao string) func(string) string {
+    // Retorna uma função anônima
+    return func(nome string) string {        //A função anônima captura a variável saudacao do escopo externo (closure).
+        return saudacao + ", " + nome + "!"
+    }
+}
+
+func main() {
+    // Criando uma função de saudação
+    saudarEmPortugues := criarSaudacao("Olá")
+    saudarEmIngles := criarSaudacao("Hello")
+
+    // Usando as funções retornadas
+    fmt.Println(saudarEmPortugues("João")) // Saída: Olá, João!
+    fmt.Println(saudarEmIngles("Mary"))    // Saída: Hello, Mary!
+}
+
+Explicação:
+A função criarSaudacao recebe uma string saudacao e retorna uma função anônima.
+
+A função anônima captura a variável saudacao do escopo externo (closure).
+
+Quando chamamos criarSaudacao("Olá"), ela retorna uma função que sempre usará "Olá" como saudação.
+
+Podemos criar diferentes funções de saudação (saudarEmPortugues, saudarEmIngles) com base no argumento passado para criarSaudacao.
+
+
+Exemplo 2: Função que retorna uma função para cálculos
+Vamos criar uma função que retorna uma função para realizar operações matemáticas:
+
+
+package main
+
+import "fmt"
+
+// Função que retorna uma função para multiplicar
+func criarMultiplicador(fator int) func(int) int {
+    return func(x int) int {
+        return x * fator
+    }
+}
+
+func main() {
+    // Criando funções multiplicadoras
+    dobrar := criarMultiplicador(2)
+    triplicar := criarMultiplicador(3)
+
+    // Usando as funções retornadas
+    fmt.Println("Dobrar 5:", dobrar(5))      // Saída: 10
+    fmt.Println("Triplicar 5:", triplicar(5)) // Saída: 15
+}
+
+Explicação:
+A função criarMultiplicador retorna uma função que multiplica um número pelo fator passado.
+
+As funções dobrar e triplicar são criadas chamando criarMultiplicador com diferentes fatores.
+
+Essas funções "lembram" o valor de fator mesmo após criarMultiplicador ter terminado sua execução (closure).
+
+
+
+Exemplo 3: Closure com variáveis capturadas
+Um dos usos mais poderosos de retornar funções é a capacidade de criar closures, onde a função retornada captura e mantém o estado das variáveis do escopo externo.
+
+Aqui está um exemplo:
+
+
+package main
+
+import "fmt"
+
+// Função que retorna uma função para contar
+func criarContador() func() int {
+    contador := 0 // Variável capturada pela closure
+    return func() int {
+        contador++
+        return contador
+    }
+}
+
+func main() {
+    // Criando um contador
+    contar := criarContador()
+
+    // Usando a função retornada
+    fmt.Println(contar()) // Saída: 1
+    fmt.Println(contar()) // Saída: 2
+    fmt.Println(contar()) // Saída: 3
+
+    // Criando outro contador independente
+    outroContador := criarContador()
+    fmt.Println(outroContador()) // Saída: 1
+    fmt.Println(outroContador()) // Saída: 2
+}
+
+Explicação:
+
+A função criarContador retorna uma função que incrementa e retorna o valor de contador.
+
+A variável contador é capturada pela função anônima (closure), mantendo seu estado entre as chamadas.
+
+Cada chamada de criarContador cria um novo escopo e uma nova variável contador, permitindo contadores independentes.
+
+
+Exemplo 4: Função que retorna uma função para filtragem
+Podemos usar funções que retornam funções para criar filtros personalizados:
+
+
+package main
+
+import "fmt"
+
+// Função que retorna uma função de filtro
+func criarFiltro(limite int) func(int) bool {
+    return func(x int) bool {
+        return x > limite
+    }
+}
+
+func main() {
+    // Criando um filtro para números maiores que 10
+    filtroMaiorQue10 := criarFiltro(10)
+
+    // Usando o filtro
+    numeros := []int{5, 12, 8, 15, 3, 20}
+    for _, num := range numeros {
+        if filtroMaiorQue10(num) {
+            fmt.Println(num) // Saída: 12, 15, 20
+        }
+    }
+}
+
+Explicação:
+A função criarFiltro retorna uma função que verifica se um número é maior que um limite.
+
+Podemos criar diferentes filtros com base no valor de limite.
+
+
+Quando usar funções que retornam funções?
+
+Closures: Para criar funções que "lembram" variáveis do escopo onde foram definidas.
+
+Fábricas de funções: Para gerar funções personalizadas com base em parâmetros.
+
+Decoradores: Para adicionar comportamentos extras a funções existentes.
+
+Callbacks: Para passar funções como argumentos ou retorná-las como resultados.
+
+Resumo
+
+Em Go, você pode retornar uma função de outra função.
+
+A função retornada pode capturar variáveis do escopo onde foi definida (closure).
+
+Isso é útil para criar funções personalizadas, fábricas de funções, closures e muito mais.
+
+Retornar funções é uma técnica poderosa que permite escrever código modular, reutilizável e expressivo.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 9. Callback
+
+Primeiro veja se você entende isso: https://play.golang.org/p/QkAtwMZU-z
+Callback é passar uma função como argumento.
+Exemplo:
+Criando uma função que toma uma função e um []int, e usa somente os números pares como argumentos para a função.
+Go Playground:
+Desafio: Crie uma função no programa acima que utilize somente os números ímpares.
+
+Em programação, um callback é uma função que é passada como argumento para outra função e é executada após a conclusão de uma operação ou em resposta a um evento. Em Go, como as funções são cidadãos de primeira classe, você pode passar funções como argumentos para outras funções, tornando os callbacks uma técnica comum e poderosa.
+
+O que é um Callback?
+Um callback é uma função que:
+
+É passada como argumento para outra função.
+
+É chamada (ou "executada de volta") em algum momento durante a execução da função que a recebeu.
+
+Pode ser usada para personalizar o comportamento de uma função ou para lidar com resultados assíncronos.
+
+Exemplo básico de Callback
+Aqui está um exemplo simples de como usar um callback em Go:
+
+
+package main
+
+import "fmt"
+
+// Função que aceita um callback como argumento
+func processar(n int, callback func(int)) {
+    resultado := n * 2
+    callback(resultado) // Chamando o callback
+}
+
+func main() {
+    // Definindo um callback
+    meuCallback := func(resultado int) {
+        fmt.Println("Resultado processado:", resultado)
+    }
+
+    // Passando o callback para a função processar
+    processar(5, meuCallback) // Saída: Resultado processado: 10
+}
+
+Explicação:
+A função processar recebe um número inteiro n e uma função callback como argumentos.
+
+Dentro de processar, o número é processado (multiplicado por 2) e o resultado é passado para o callback.
+
+O callback é chamado com o resultado, permitindo personalizar o que acontece com o resultado processado.
+
+Exemplo 2: Callback com múltiplos parâmetros
+Callbacks podem receber múltiplos parâmetros, permitindo maior flexibilidade:
+
+
+package main
+
+import "fmt"
+
+// Função que aceita um callback com múltiplos parâmetros
+func calcular(a, b int, callback func(int, int) int) int {
+    return callback(a, b) // Chamando o callback e retornando o resultado
+}
+
+func main() {
+    // Definindo um callback para soma
+    soma := func(x, y int) int {
+        return x + y
+    }
+
+    // Definindo um callback para multiplicação
+    multiplicacao := func(x, y int) int {
+        return x * y
+    }
+
+    // Usando os callbacks
+    resultadoSoma := calcular(3, 4, soma)
+    resultadoMultiplicacao := calcular(3, 4, multiplicacao)
+
+    fmt.Println("Soma:", resultadoSoma)             // Saída: 7
+    fmt.Println("Multiplicação:", resultadoMultiplicacao) // Saída: 12
+}
+
+Explicação:
+A função calcular recebe dois números e um callback que realiza uma operação com esses números.
+
+Diferentes callbacks (soma e multiplicacao) podem ser passados para personalizar o comportamento da função calcular.
+
+
+Exemplo 3: Callback para operações assíncronas
+Callbacks são frequentemente usados em operações assíncronas, como chamadas de rede ou leitura de arquivos. Aqui está um exemplo simulado:
+
+
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+// Função que simula uma operação assíncrona com callback
+func a(operacaoAssincroncallback func(string)) {
+    go func() {
+        // Simulando uma operação demorada
+        time.Sleep(2 * time.Second)
+        callback("Operação concluída!")
+    }()
+}
+
+func main() {
+    fmt.Println("Iniciando operação assíncrona...")
+
+    // Passando um callback para ser executado após a operação
+    operacaoAssincrona(func(mensagem string) {
+        fmt.Println(mensagem) // Saída: Operação concluída!
+    })
+
+    // Dando tempo para a operação assíncrona terminar
+    time.Sleep(3 * time.Second)
+}
+
+Explicação:
+A função operacaoAssincrona simula uma operação demorada usando time.Sleep.
+
+Um callback é passado para ser executado após a conclusão da operação.
+
+O callback é chamado dentro de uma goroutine, permitindo que a função principal continue sua execução sem bloquear.
+
+Exemplo 4: Callback para tratamento de erros
+Callbacks também podem ser usados para lidar com erros ou resultados de operações que podem falhar:
+
+
+package main
+
+import (
+    "errors"
+    "fmt"
+)
+
+// Função que simula uma operação que pode falhar
+func operacaoComErro(callback func(int, error)) {
+    sucesso := false // Simulando uma operação que pode falhar
+    if sucesso {
+        callback(42, nil) // Sucesso
+    } else {
+        callback(0, errors.New("Algo deu errado")) // Erro
+    }
+}
+
+func main() {
+    // Passando um callback para lidar com o resultado ou erro
+    operacaoComErro(func(resultado int, err error) {
+        if err != nil {
+            fmt.Println("Erro:", err)
+        } else {
+            fmt.Println("Resultado:", resultado)
+        }
+    })
+}
+
+Explicação:
+A função operacaoComErro simula uma operação que pode falhar.
+
+O callback recebe dois parâmetros: o resultado (se bem-sucedido) e um erro (se falhar).
+
+O callback é responsável por lidar com o resultado ou o erro.
+
+Quando usar Callbacks?
+Operações assíncronas: Para lidar com resultados de operações que levam tempo, como chamadas de rede ou leitura de arquivos.
+
+Personalização de comportamento: Para permitir que o chamador personalize o comportamento de uma função.
+
+Tratamento de erros: Para lidar com erros ou resultados de operações que podem falhar.
+
+Eventos: Para responder a eventos, como cliques de botão em interfaces gráficas (embora Go não seja comumente usado para interfaces gráficas).
+
+Resumo
+Um callback é uma função passada como argumento para outra função e executada em algum momento.
+
+Em Go, callbacks são comuns devido ao suporte a funções como cidadãos de primeira classe.
+
+Callbacks são úteis para operações assíncronas, personalização de comportamento e tratamento de erros.
+
+Eles permitem escrever código modular, reutilizável e flexível.
+
+Callbacks são uma técnica fundamental em programação funcional e são amplamente utilizados em Go para criar código mais expressivo e poderoso.
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+Funções – 10. Closure
+
+Closure é cercar ou capturar um scope para que possamos utilizá-lo em outro contexto. Já vimos:
+Package-level scope
+Function-level scope
+Code-block-in-code-block scope
+Exemplo de closure:
+func i() func() int { x := 0; return func() int { x++; return x } }
+Quando fizermos a := i() teremos um scope, um valor para x.
+Quando fizermos b := i() teremos outro scope, e x terá um valor independente do x acima.
+Closures nos permitem salvar dados entre function calls e ao mesmo tempo isolar estes dados do resto do código.
+Go Playground: https://play.golang.org/p/AdFciYwI2Z
+
+aula - https://youtu.be/mOM0qTB5ppU?list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg
+
+
+Em Go, uma closure é uma função que "captura" e mantém referências a variáveis do escopo em que foi definida, mesmo após o escopo ter sido encerrado.
+Isso permite que a função "lembre" do ambiente em que foi criada, incluindo variáveis locais, e as use mesmo quando executada em um contexto diferente.
+
+O que é uma Closure?
+Uma closure é uma função que:
+
+Captura variáveis: A função pode acessar variáveis do escopo externo onde foi definida.
+
+Mantém o estado: As variáveis capturadas mantêm seu estado entre chamadas da função.
+
+É autossuficiente: A função pode ser passada para outros contextos e ainda acessar as variáveis capturadas.
+
+Exemplo básico de Closure
+Aqui está um exemplo simples de uma closure em Go:
+
+
+package main
+
+import "fmt"
+
+func main() {
+    // Variável no escopo da função main
+    contador := 0
+
+    // Closure: função anônima que captura a variável contador
+    incrementar := func() int {
+        contador++
+        return contador
+    }
+
+    // Usando a closure
+    fmt.Println(incrementar()) // Saída: 1
+    fmt.Println(incrementar()) // Saída: 2
+    fmt.Println(incrementar()) // Saída: 3
+}
+Explicação:
+A variável contador é definida no escopo da função main.
+
+A função anônima incrementar captura a variável contador e a incrementa a cada chamada.
+
+Mesmo após o escopo da função main ter sido encerrado, a closure incrementar ainda pode acessar e modificar contador.
+
+Exemplo 2: Closure com múltiplas variáveis capturadas
+Uma closure pode capturar múltiplas variáveis do escopo externo:
+
+
+package main
+
+import "fmt"
+
+func main() {
+    x := 10
+    y := 5
+
+    // Closure que captura x e y
+    soma := func() int {
+        return x + y
+    }
+
+    fmt.Println("Soma:", soma()) // Saída: 15
+
+    // Modificando as variáveis capturadas
+    x = 20
+    y = 30
+    fmt.Println("Soma atualizada:", soma()) // Saída: 50
+}
+Explicação:
+A closure soma captura as variáveis x e y.
+
+Quando x e y são modificados, a closure reflete essas mudanças em sua execução.
+
+Exemplo 3: Closure em funções que retornam funções
+Um dos usos mais comuns de closures é em funções que retornam outras funções. A função retornada pode capturar 
+variáveis do escopo da função externa.
+
+Aqui está um exemplo:
+
+
+package main
+
+import "fmt"
+
+// Função que retorna uma closure
+func criarContador() func() int {
+    contador := 0 // Variável capturada pela closure
+    return func() int {
+        contador++
+        return contador
+    }
+}
+
+func main() {
+    // Criando uma closure
+    contar := criarContador()
+
+    // Usando a closure
+    fmt.Println(contar()) // Saída: 1
+    fmt.Println(contar()) // Saída: 2
+    fmt.Println(contar()) // Saída: 3
+
+    // Criando outra closure independente
+    outroContador := criarContador()
+    fmt.Println(outroContador()) // Saída: 1
+    fmt.Println(outroContador()) // Saída: 2
+}
+Explicação:
+A função criarContador retorna uma função anônima que captura a variável contador.
+
+Cada chamada de criarContador cria um novo escopo e uma nova variável contador, permitindo contadores independentes.
+
+Exemplo 4: Closure com parâmetros
+Closures também podem receber parâmetros, além de capturar variáveis do escopo externo:
+
+
+package main
+
+import "fmt"
+
+func main() {
+    // Closure com parâmetros
+    multiplicador := func(fator int) func(int) int {
+        return func(x int) int {
+            return x * fator
+        }
+    }
+
+    // Criando uma função para dobrar números
+    dobrar := multiplicador(2)
+
+    // Usando a closure
+    fmt.Println("Dobrar 5:", dobrar(5)) // Saída: 10
+    fmt.Println("Dobrar 10:", dobrar(10)) // Saída: 20
+}
+Explicação:
+A closure multiplicador captura o parâmetro fator e retorna uma função que multiplica um número por fator.
+
+A função dobrar é criada chamando multiplicador(2) e pode ser usada para dobrar números.
+
+Exemplo 5: Closure em goroutines
+Closures são frequentemente usadas em goroutines para capturar variáveis do escopo externo:
+
+
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    mensagem := "Olá, mundo!"
+
+    // Executando uma closure em uma goroutine
+    go func() {
+        fmt.Println(mensagem) // Captura a variável mensagem
+    }()
+
+    // Dando tempo para a goroutine executar
+    time.Sleep(1 * time.Second)
+}
+
+Explicação:
+
+A closure captura a variável mensagem do escopo da função main.
+
+A goroutine executa a closure, que imprime a mensagem capturada.
+
+Quando usar Closures?
+Manter estado: Para criar funções que "lembram" valores entre chamadas.
+
+Fábricas de funções: Para gerar funções personalizadas com base em parâmetros.
+
+Callbacks: Para passar funções que precisam acessar variáveis do escopo atual.
+
+Goroutines: Para capturar variáveis e usá-las em execuções concorrentes.
+
+Resumo:
+
+Uma closure é uma função que captura e mantém referências a variáveis do escopo em que foi definida.
+
+Em Go, closures são criadas usando funções anônimas que acessam variáveis do escopo externo.
+
+Closures são úteis para manter estado, criar fábricas de funções, implementar callbacks e trabalhar com goroutines.
+
+Elas permitem escrever código modular, flexível e poderoso, especialmente em cenários onde o estado precisa ser preservado entre chamadas de função.
+
+Closures são uma das características mais poderosas de Go, permitindo que você escreva código funcional e expressivo.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Funções – 11. Recursividade
+
+WP: "The most common application of recursion is in mathematics and computer science, where a function being defined is applied within its own definition."
+Exemplos de recursividade: Fractais, matrioscas, efeito Droste (o efeito produzido por uma imagem que aparece dentro dela própria), GNU (“GNU is Not Unix”), etc.
+No estudo de funções: é uma função que chama a ela própria.
+Exemplo: fatoriais.
+4! = 4 * 3 * 2 * 1 (e no zero, deu.)
+
+Com recursividade. Go Playground: https://play.golang.org/p/ujsLnUhRp_
+
+Com loops. Go Playground: https://play.golang.org/p/F2VsUjYVhc
+
+
+//** Tem momentos que vc vai querer usar funções recursivas, para todos os outros use LOOPS, pois toman menos memória e tbm menos chances de erro.
+
+ 
+
+A recursividade é um conceito em programação onde uma função chama a si mesma para resolver um problema. Em Go (Golang), 
+assim como em outras linguagens de programação, a recursividade pode ser usada para resolver problemas que podem ser divididos em 
+subproblemas menores e similares.
+
+Aqui está um exemplo básico de uma função recursiva em Go que calcula o fatorial de um número:
+
+
+package main
+
+import "fmt"
+
+// Função recursiva para calcular o fatorial de um número
+func factorial(n int) int {
+    // Caso base: se n for 0 ou 1, o fatorial é 1
+    if n == 0 || n == 1 {
+        return 1
+    }
+    // Chamada recursiva: n * fatorial de (n-1)
+    return n * factorial(n-1)
+}
+
+func main() {
+    num := 5
+    fmt.Printf("O fatorial de %d é %d\n", num, factorial(num))
+}
+
+Explicação:
+
+Caso base: A função factorial tem um caso base que verifica se n é 0 ou 1. Se for, a função retorna 1, pois o fatorial de 0 e 1 é 1.
+
+Chamada recursiva: Se n for maior que 1, a função chama a si mesma com n-1 e multiplica o resultado por n. Isso continua até que o 
+caso base seja alcançado.
+
+
+Outro exemplo: Soma de números em uma lista
+Aqui está outro exemplo de uma função recursiva que soma todos os números em uma lista:
+
+
+package main
+
+import "fmt"
+
+// Função recursiva para somar os números em uma lista
+func sumList(nums []int) int {
+    // Caso base: se a lista estiver vazia, retorna 0
+    if len(nums) == 0 {
+        return 0
+    }
+    // Chamada recursiva: soma o primeiro elemento com a soma do restante da lista
+    return nums[0] + sumList(nums[1:])
+}
+
+func main() {
+    numbers := []int{1, 2, 3, 4, 5}
+    fmt.Printf("A soma da lista é %d\n", sumList(numbers))
+}
+Explicação:
+Caso base: Se a lista estiver vazia, a função retorna 0.
+
+Chamada recursiva: A função soma o primeiro elemento da lista com o resultado da chamada recursiva da função com o restante da lista
+ (excluindo o primeiro elemento).
+
+
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Considerações importantes:
+
+Caso base: Sempre deve haver um caso base para evitar que a função chame a si mesma indefinidamente, o que levaria a um estouro de pilha (stack overflow).
+
+Eficiência: A recursividade pode ser menos eficiente em termos de uso de memória e desempenho em comparação com soluções iterativas, especialmente para problemas que podem ser resolvidos com loops simples.
+
+Tail Recursion: Em algumas linguagens, a recursão em cauda (tail recursion) pode ser otimizada pelo compilador para evitar o aumento da pilha de chamadas. 
+No entanto, Go não otimiza tail recursion, então é importante estar ciente disso ao usar recursividade em Go.
+
+A recursividade é uma ferramenta poderosa, mas deve ser usada com cuidado para evitar problemas de desempenho e estouro de pilha.
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+ Revisar tudo ate aqui...
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Exercícios: ninja Nível 6
+
+        na prática: exercício
+
+- Exercício:
+        - Crie uma função que retorne um int
+        - Crie outra função que retorne um int e uma string
+        - Chame as duas funções
+        - Demonstre seus resultados
+- Soluçoes: - https://go.dev/play/p/1mzdeW_r7sI
+
+
+Revisão:
+Funções!
+Servem para abstrair código
+E para reutilizar código
+A ordem das coisas é:
+func (receiver) identifier (parameters) (returns) { code }
+Parâmetros vs. argumentos
+Funções variádicas
+//////////////////////
+Múltiplos parâmetros
+
+Em programação, parâmetros e argumentos são conceitos relacionados, mas têm significados distintos. 
+Vamos esclarecer a diferença entre eles:
+
+//Parâmetros
+
+O que são?
+Parâmetros são as variáveis listadas na definição de uma função. 
+Eles representam os valores que a função espera receber quando for chamada.
+
+Onde são definidos?
+Na assinatura da função, entre parênteses ().
+
+Para que servem?
+Eles atuam como "placeholders" (espaços reservados) para os valores que serão passados à função.
+
+Exemplo em Go:
+
+
+func soma(a int, b int) int {
+    return a + b
+}
+Aqui, a e b são parâmetros da função soma. Eles são do tipo int.
+
+//Argumentos
+
+O que são?
+Argumentos são os valores reais passados para a função quando ela é chamada.
+
+Onde são usados?
+Na chamada da função, substituindo os parâmetros definidos.
+
+Para que servem?
+Eles fornecem os dados que a função vai processar.
+
+Exemplo em Go:
+
+
+resultado := soma(3, 5)
+Aqui, 3 e 5 são argumentos passados para a função soma. Eles substituem os parâmetros a e b durante a execução.
+
+Diferença resumida
+
+Parâmetros	Argumentos
+
+Definidos na assinatura da função.	Passados na chamada da função.
+
+São variáveis.	São valores reais.
+
+Atuam como espaços reservados.	Fornecem os dados para a função.
+
+Exemplo completo
+Aqui está um exemplo completo em Go para ilustrar a diferença:
+
+
+package main
+
+import "fmt"
+
+// Função com parâmetros
+func saudacao(nome string, idade int) {
+    fmt.Printf("Olá, %s! Você tem %d anos.\n", nome, idade)
+}
+
+func main() {
+    // Chamada da função com argumentos
+    saudacao("João", 30)
+}
+Parâmetros: nome string e idade int (definidos na função saudacao).
+
+Argumentos: "João" e 30 (passados na chamada da função).
+
+Dicas importantes
+Ordem dos argumentos:
+Os argumentos devem ser passados na mesma ordem em que os parâmetros foram definidos.
+
+Tipos compatíveis:
+Os argumentos devem ser do mesmo tipo (ou compatíveis) com os parâmetros definidos.
+
+Parâmetros variádicos:
+Em Go, é possível usar parâmetros variádicos (um número variável de argumentos) com .... Exemplo:
+
+
+func soma(numeros ...int) int {
+    total := 0
+    for _, num := range numeros {
+        total += num
+    }
+    return total
+}
+Em resumo, parâmetros são as variáveis que a função espera, enquanto argumentos são os valores reais passados para a função. 
+Ambos são essenciais para o funcionamento das funções em Go e em outras linguagens de programação.
+////////////////////
+
+Múltiplos argumentos
+Você pode definir uma função com vários parâmetros, cada um recebendo um argumento específico.
+Parâmetros explícitos: Defina cada parâmetro individualmente.
+
+Parâmetros variádicos: Use ... para aceitar um número variável de argumentos.
+
+Slice como argumentos variádicos: Passe um slice usando ... .
+
+Múltiplos retornos: Retorne mais de um valor de uma função.
+
+Structs: Agrupe argumentos relacionados em uma struc
+//////////////////
+
+Métodos
+Interfaces & polimorfismo
+Defer
+"Deixa pra depois!"
+Returns
+Múltiplos returns
+Returns com nome (blé!)
+Funcs como expressões
+Atribuindo uma função a uma variável
+Callbacks
+Passando uma função como argumento para outra função
+Closure
+Capturando um scope
+Variáveis declaradas em scopes externos são visíveis em scopes internos
+Recursividade
+Uma função que chama a ela mesma
+Fatoriais 
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+ex 02 -  Crie uma função que receba um parâmetro variádico do tipo int retorne a soma de todos os ints recebidos;
+ 
+        - Passe um valor do tipo slice of int como argumento para a função;
+
+        - Crie outra função, esta deve receber um valor do tipo slice of int e retornar a soma de todos os elementos da slice;
+
+        - Passe uma valor do tipo slice of int como argumento para a função.
+
+- solução:  eu fiz - https://go.dev/play/p/Op0RuhgtFKf
+
+DeepSeek Exemplo - https://go.dev/play/p/t2_rlXve5im
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+ex 03 - Utilize a declaração defer da maneira que demonstre que sua execução só ocorre ao final do contexto ao qual ela pertençe
+
+ - solução: - https://go.dev/play/p/S6pepA3JTb8
+
+
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ ex 04 - Crie um tipo struct "pessoa" que contenha os campos:
+        - nome
+        - sobrenome
+        - idade
+- Crie um métodopara "pessoa" que demonstre o nome completo e a idade;
+- Crie um valor de tipo "pessoa";
+- Utilize o método criando para demonstrar esse valor.
+
+-solução: -https://go.dev/play/p/FviPgjBYt19
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ ex 05
+
+Crie um tipo "quadrado"
+Crie um tipo "círculo"
+Crie um método "área" para cada tipo que calcule e retorne a área da figura
+
+Área do círculo: 2 * π * raio
+Área do quadrado: lado * lado
+
+Crie um tipo "figura" que defina como interface qualquer tipo que tiver o método "área"
+Crie uma função "info" que receba um tipo "figura" e retorne a área da figura
+Crie um valor de tipo "quadrado"
+Crie um valor de tipo "círculo"
+Use a função "info" para demonstrar a área do "quadrado"
+Use a função "info" para demonstrar a área do "círculo"
+Solução:  https://go.dev/play/p/162uGww4gNG
+
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ ex 06
+
+
+Crie e utilize uma função anônima.
+Solução: https://go.dev/play/p/ZdM_fDiygLG
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ ex 07
+
+ Atribua uma função a uma variável.
+Chame essa função.
+Solução: https://go.dev/play/p/guI4aJ77PH9
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ ex 8
+
+ Crie uma função que retorna uma função.
+Atribua a função retornada a uma variável.
+Chame a função retornada.
+Solução: https://play.golang.org/p/A74rufv6Rs
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ ex 9
+
+Callback: passe uma função como argumento a outra função.
+Solução: https://go.dev/play/p/k2SQb4toixW
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ ex 10
+
+ Demonstre o funcionamento de um closure.
+
+ Em Go, não temos closures no mesmo sentido que em linguagens como JavaScript ou Python,
+ mas podemos simular um comportamento semelhante usando funções anônimas e capturando variáveis do escopo externo
+
+ - crie uma função que retorna outra função, onde esta outra função faz uso de uma variável alem de seu scope.
+Solução: https://go.dev/play/p/zLD02vOFMQl
+
+outro exemplo so pelo main()- https://go.dev/play/p/qJUv_fNfosT
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+

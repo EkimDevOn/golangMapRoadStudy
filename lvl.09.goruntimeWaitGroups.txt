@@ -1,0 +1,598 @@
+
+
+Concorrência – 1. Concorrência vs. paralelismo
+
+
+
+Concorrência é quando abre uma padaria do lado da outra e as duas quebram :)
+Fun facts: 
+O primeiro CPU dual core "popular" veio em 2006
+Em 2007 o Google começou a criar a linguagem Go para utilizar essa vantagem
+Go foi a primeira linguagem criada com multi-cores em mente
+C, C++, C#, Java, JavaScript, Python, etc., foram todas criadas antes de 2006
+Ou seja, Go tem uma abordagem única (fácil!) para este tópico
+E qual a diferença entre concorrência e paralelismo?
+
+MAIS DETALHADO :
+
+Concorrência e paralelismo são dois conceitos relacionados, mas distintos, que frequentemente causam confusão. Ambos lidam com a execução de múltiplas tarefas, mas de maneiras diferentes. Vamos explorar cada um deles e suas diferenças:
+
+1. Concorrência (Concurrency)
+Concorrência é sobre lidar com múltiplas tarefas ao mesmo tempo, mas não necessariamente executá-las simultaneamente. Em um sistema concorrente, as tarefas são gerenciadas de forma intercalada, dando a impressão de que estão sendo executadas ao mesmo tempo, mesmo que apenas uma esteja sendo processada por vez.
+
+Características:
+Foca na estruturação do programa para que ele possa lidar com várias tarefas ao mesmo tempo.
+
+Pode ser implementada em um único núcleo de CPU, alternando entre tarefas rapidamente (multitarefa).
+
+Envolve compartilhamento de recursos e sincronização entre tarefas.
+
+Exemplo: Um programa que lida com várias requisições HTTP ao mesmo tempo, alternando entre elas.
+
+Exemplo em Go:
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func task(name string) {
+	for i := 1; i <= 3; i++ {
+		fmt.Println(name, ":", i)
+		time.Sleep(100 * time.Millisecond)
+	}
+}
+
+func main() {
+	go task("Tarefa 1") // Executa concorrentemente
+	go task("Tarefa 2") // Executa concorrentemente
+
+	time.Sleep(time.Second) // Espera as goroutines terminarem
+	fmt.Println("Fim do programa")
+}
+Neste exemplo, as duas tarefas são executadas concorrentemente, mas podem estar rodando em um único núcleo de CPU, alternando entre si.
+
+2. Paralelismo (Parallelism)
+Paralelismo é sobre executar múltiplas tarefas ao mesmo tempo, literalmente. Isso requer hardware com múltiplos núcleos de CPU ou processadores, onde cada núcleo pode executar uma tarefa simultaneamente.
+
+Características:
+Foca na execução simultânea de tarefas.
+
+Requer hardware com múltiplos núcleos de CPU.
+
+Melhora o desempenho ao dividir o trabalho entre vários núcleos.
+
+Exemplo: Processamento de imagens em paralelo, onde cada núcleo processa uma parte da imagem.
+
+Exemplo em Go:
+
+package main
+
+import (
+	"fmt"
+	"runtime"
+	"sync"
+)
+
+func task(name string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i := 1; i <= 3; i++ {
+		fmt.Println(name, ":", i)
+	}
+}
+
+func main() {
+	runtime.GOMAXPROCS(4) // Usa até 4 núcleos de CPU
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go task("Tarefa 1", &wg) // Executa em paralelo
+	go task("Tarefa 2", &wg) // Executa em paralelo
+
+	wg.Wait()
+	fmt.Println("Fim do programa")
+}
+Neste exemplo, as tarefas podem ser executadas em paralelo em diferentes núcleos de CPU, dependendo da configuração do hardware.
+
+3. Diferenças Chave
+Aspecto	Concorrência	Paralelismo
+Definição	Lidar com múltiplas tarefas ao mesmo tempo.	Executar múltiplas tarefas ao mesmo tempo.
+Simultaneidade	Pode ser simulada (alternância entre tarefas).	Requer execução simultânea.
+Hardware Necessário	Funciona em um único núcleo de CPU.	Requer múltiplos núcleos de CPU.
+Foco	Estruturação do programa e gerenciamento.	Desempenho e velocidade de execução.
+Exemplo	Um servidor web lidando com várias requisições.	Processamento de dados em múltiplos núcleos.
+4. Relação entre Concorrência e Paralelismo
+Concorrência não implica paralelismo: Um programa concorrente pode ser executado em um único núcleo de CPU, alternando entre tarefas.
+
+Paralelismo requer concorrência: Para executar tarefas em paralelo, o programa precisa ser concorrente (estruturado para lidar com múltiplas tarefas).
+
+Concorrência permite paralelismo: Se o hardware suportar, um programa concorrente pode ser executado em paralelo.
+
+5. Exemplo Prático
+Imagine um restaurante:
+
+Concorrência: Um garoto de entrega (único) alterna entre entregar pedidos para vários clientes. Ele não faz várias entregas ao mesmo tempo, mas gerencia várias tarefas.
+
+Paralelismo: Vários garotos de entrega fazem entregas simultaneamente, cada um cuidando de um pedido diferente.
+
+6. Em Go
+Go é uma linguagem projetada para concorrência, com goroutines e channels facilitando a criação de programas concorrentes. O paralelismo em Go é alcançado quando o programa é executado em hardware com múltiplos núcleos, e o runtime de Go distribui as goroutines entre os núcleos disponíveis.
+
+Resumo:
+Use concorrência para estruturar seu programa de forma que ele possa lidar com múltiplas tarefas.
+
+Use paralelismo para melhorar o desempenho, executando tarefas simultaneamente em múltiplos núcleos de CPU.
+
+Ambos os conceitos são complementares e essenciais para construir sistemas eficientes e escaláveis.
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+////////////////////////////////////////////////////////////////////////////////////////
+
+
+2. Goroutines & WaitGroups
+
+
+O código abaixo é linear. Como fazer as duas funções rodarem concorrentemente?
+https://play.golang.org/p/XP-ZMeHUk4
+Goroutines!
+O que são goroutines? São "threads."
+O que são threads? [WP](https://pt.wikipedia.org/wiki/Thread_...)
+Na prática: go func.
+Exemplo: código termina antes da go func executar.
+Ou seja, precisamos de uma maneira pra "sincronizar" isso.
+Ah, mas então... não.
+Qualé então? sync.WaitGroup:
+Um WaitGroup serve para esperar que uma coleção de goroutines termine sua execução.
+func Add: "Quantas goroutines?"
+func Done: "Deu!"
+func Wait: "Espera todo mundo terminar."
+Ah, mas então... sim!
+Só pra ver: runtime.NumCPU() & runtime.NumGoroutine() // essa func monstra  o número de processadores que esta rodadando o programa!
+
+Go Playground: https://play.golang.org/p/8iiqLX4sWc
+
+
+
+MAIS DETALHADO :
+
+
+Em Go (Golang), goroutines e WaitGroups são mecanismos poderosos para lidar com concorrência e sincronização.
+ Vamos explorar cada um deles e como eles podem ser usados juntos.
+
+1. Goroutines
+Goroutines são funções ou métodos que são executados de forma concorrente em Go.
+Elas são leves e gerenciadas pelo runtime de Go, permitindo que você execute milhares ou até milhões de goroutines simultaneamente.
+
+Para iniciar uma goroutine, basta usar a palavra-chave go antes da chamada da função:
+
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func printNumbers() {
+	for i := 1; i <= 5; i++ {
+		fmt.Println(i)
+		time.Sleep(500 * time.Millisecond)
+	}
+}
+
+func main() {
+	go printNumbers() // Inicia a goroutine
+	go printNumbers() // Inicia outra goroutine
+
+	// Espera um pouco para que as goroutines possam executar
+	time.Sleep(3 * time.Second)
+	fmt.Println("Fim do programa")
+}
+No exemplo acima, duas goroutines são iniciadas para executar a função printNumbers concorrentemente. O time.
+Sleep no main é usado para garantir que o programa não termine antes que as goroutines tenham tempo de executar.
+
+2. WaitGroups
+Um problema comum ao usar goroutines é saber quando todas elas terminaram de executar. O sync.
+WaitGroup é uma estrutura que ajuda a sincronizar goroutines, permitindo que você espere até que todas as goroutines tenham terminado.
+
+Aqui está um exemplo de como usar WaitGroup:
+
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func printNumbers(wg *sync.WaitGroup) {
+	defer wg.Done() // Marca a goroutine como concluída
+
+	for i := 1; i <= 5; i++ {
+		fmt.Println(i)
+		time.Sleep(500 * time.Millisecond)
+	}
+}
+
+func main() {
+	var wg sync.WaitGroup
+
+	wg.Add(2) // Adiciona 2 goroutines ao WaitGroup
+
+	go printNumbers(&wg)
+	go printNumbers(&wg)
+
+	wg.Wait() // Espera até que todas as goroutines tenham terminado
+	fmt.Println("Fim do programa")
+}
+Explicação:
+wg.Add(2): Informa ao WaitGroup que há 2 goroutines que precisam ser esperadas.
+
+defer wg.Done(): A função Done é chamada quando a goroutine termina, decrementando o contador do WaitGroup.
+
+wg.Wait(): Bloqueia a execução até que o contador do WaitGroup chegue a zero, ou seja, até que todas as goroutines tenham chamado Done.
+
+3. Combinando Goroutines e WaitGroups
+A combinação de goroutines e WaitGroup é muito comum em programas concorrentes em Go. 
+Ela permite que você execute várias tarefas em paralelo e espere até que todas tenham terminado antes de continuar.
+
+Aqui está um exemplo mais complexo:
+
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func worker(id int, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	fmt.Printf("Worker %d starting\n", id)
+	time.Sleep(time.Second) // Simula trabalho
+	fmt.Printf("Worker %d done\n", id)
+}
+
+func main() {
+	var wg sync.WaitGroup
+
+	for i := 1; i <= 5; i++ {
+		wg.Add(1)
+		go worker(i, &wg)
+	}
+
+	wg.Wait()
+	fmt.Println("Todos os workers terminaram")
+}
+Explicação:
+wg.Add(1): Adiciona uma goroutine ao WaitGroup antes de iniciar cada worker.
+
+go worker(i, &wg): Inicia uma goroutine para cada worker.
+
+wg.Wait(): Espera até que todos os workers tenham terminado.
+
+Conclusão
+Goroutines e WaitGroup são ferramentas essenciais para trabalhar com concorrência em Go.
+ Goroutines permitem que você execute tarefas em paralelo, enquanto WaitGroup ajuda a sincronizar e garantir que todas as goroutines tenham terminado antes de prosseguir.
+ Combinados, eles permitem que você crie programas concorrentes eficientes e fáceis de entender.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Documentação sobre concorrencia
+
+Concorrência – 3. Discussão: Condição de corrida
+
+https://golang.org/doc/effective_go.h...
+https://pt.wikipedia.org/wiki/Multipl...
+O que é yield? runtime.Gosched()
+Race condition: 
+        Função 1       var     Função 2
+         Lendo: 0   →   0
+         Yield          0   →   Lendo: 0
+         var++: 1               Yield
+         Grava: 1   →   1       var++: 1
+                        1   ←   Grava: 1
+         Lendo: 1   ←   1
+         Yield          1   →   Lendo: 1
+         var++: 2               Yield
+         Grava: 2   →   2       var++: 2
+                        2   ←   Grava: 2
+
+E é por isso que vamos ver mutex, atomic e, por fim, channels.
+
+
+
+MAIS DETALHADO :
+
+
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go increment(&wg)
+	go increment(&wg)
+
+	wg.Wait()
+	fmt.Println("Counter final:", counter)
+}
+Aqui, o Mutex garante que apenas uma goroutine por vez possa incrementar counter.
+
+Usando Channels
+Outra abordagem é usar channels para sincronizar o acesso:
+
+
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func increment(wg *sync.WaitGroup, ch chan int) {
+	defer wg.Done()
+	for i := 0; i < 1000; i++ {
+		ch <- 1 // Envia um valor para o channel
+	}
+}
+
+func main() {
+	var wg sync.WaitGroup
+	ch := make(chan int, 1000) // Buffer para evitar deadlock
+
+	counter := 0
+
+	wg.Add(2)
+	go increment(&wg, ch)
+	go increment(&wg, ch)
+
+	// Goroutine para consumir os valores do channel
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for val := range ch {
+		counter += val
+	}
+
+	fmt.Println("Counter final:", counter)
+}
+Neste exemplo, as goroutines enviam valores para o channel, e uma goroutine separada consome esses valores para atualizar counter.
+
+Conclusão
+Condições de corrida são um problema comum em programas concorrentes.
+ Em Go, você pode usar o race detector para identificá-las e mecanismos como Mutex ou channels para evitá-las. 
+ Sempre que trabalhar com recursos compartilhados em goroutines, certifique-se de sincronizar o acesso adequadamente.
+
+ Aqui vamos replicar a race condition mencionada no artigo anterior.
+time.Sleep(time.Second) vs. runtime.Gosched()
+go help → go help build → go run -race main.go
+Como resolver? Mutex. 
+
+ 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Concorrência – 5. Mutex - tranca a variavél ou um trecho de código
+
+Agora vamos resolver a race condition do programa anterior utilizando mutex.
+Mutex é mutual exclusion, exclusão mútua.
+Utilizando mutex somente uma thread poderá utilizar a variável contador de cada vez, e as outras deve aguardar sua vez "na fila."
+Na prática:
+type Mutex
+func (m *Mutex) Lock()
+func (m *Mutex) Unlock()
+RWMutex
+Código: https://github.com/ellenkorbes/aprend...
+
+MAIS DETALHADO KIMI.IA :
+
+Em Golang, um Mutex (abreviação de "mutual exclusion") é um mecanismo de sincronização usado para controlar
+ o acesso concorrente a recursos compartilhados entre várias goroutines.
+ Ele garante que apenas uma goroutine de cada vez possa acessar ou modificar um recurso específico.
+
+Principais Características
+
+Garantia de Exclusão Mútua:
+
+Um mutex garante que, quando uma goroutine está acessando um recurso protegido por ele, nenhuma outra goroutine pode acessar esse mesmo recurso até que o mutex seja liberado.
+
+Bloqueio e Desbloqueio:
+
+Um mutex possui dois métodos principais: Lock() e Unlock().
+
+Lock() bloqueia o mutex. Se o mutex já estiver bloqueado por outra goroutine, a goroutine que chama Lock() será bloqueada até que o mutex seja liberado.
+Unlock() desbloqueia o mutex, permitindo que outras goroutines possam bloqueá-lo.
+
+Prevenção de Deadlocks:
+
+É importante garantir que o mutex seja sempre desbloqueado após ser bloqueado. Se uma goroutine bloqueia um mutex e é interrompida antes de desbloqueá-lo,
+ outras goroutines podem ficar bloqueadas indefinidamente, causando um deadlock. Para evitar isso, é recomendado
+usar o defer para garantir que o mutex seja desbloqueado, mesmo em caso de erro.
+
+Exemplo de Uso
+
+Aqui está um exemplo simples de como usar um mutex em Golang para proteger um recurso compartilhado:
+
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+	var counter int
+	var mutex sync.Mutex
+
+	// Função que incrementa o contador de forma segura
+	increment := func() {
+		mutex.Lock()
+		defer mutex.Unlock()
+		counter++
+		fmt.Println("Counter:", counter)
+	}
+
+	// Criando várias goroutines para incrementar o contador
+	for i := 0; i < 10; i++ {
+		go increment()
+	}
+
+	// Aguardando um tempo para garantir que todas as goroutines terminem
+	time.Sleep(1 * time.Second)
+	fmt.Println("Final Counter:", counter)
+}
+
+Explicação do Exemplo
+Variáveis Compartilhadas:
+counter é uma variável compartilhada que várias goroutines podem acessar e modificar.
+mutex é um objeto do tipo sync.Mutex usado para sincronizar o acesso a counter.
+
+Função increment:
+Antes de incrementar o contador, a goroutine bloqueia o mutex chamando mutex.Lock().
+
+O defer mutex.Unlock() garante que o mutex será desbloqueado quando a função increment retornar, mesmo em caso de erro.
+Goroutines:
+
+Várias goroutines são criadas para chamar a função increment simultaneamente.
+O uso do mutex garante que apenas uma goroutine de cada vez possa incrementar o contador, evitando condições de corrida (race conditions).
+
+Aguardando o Fim das Goroutines:
+
+time.Sleep(1 * time.Second) é usado para garantir que todas as goroutines tenham tempo suficiente para executar.
+ Em um código real, é melhor usar sincronização explícita, como sync.WaitGroup, para aguardar o término das goroutines.
+Conclusão
+Mutexes são uma ferramenta poderosa para controlar o acesso concorrente a recursos compartilhados em Golang. 
+Eles são essenciais para evitar condições de corrida e garantir a integridade dos dados em um ambiente concorrente.
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Concorrência – 6. Atomic
+
+Agora vamos fazer a mesma coisa, mas com atomic ao invés de mutex.
+atomic.AddInt64
+atomic.LoadInt64
+Código: https://github.com/ellenkorbes/aprend...
+
+MAIS DETALHADO :
+
+ Em Golang, o pacote sync/atomic fornece operações atômicas que podem ser usadas para manipular variáveis de forma segura em um
+  ambiente concorrente, sem a necessidade de mutexes. As operações atômicas garantem que uma operação seja
+  executada de forma indivisível, ou seja, sem interrupções de outras goroutines.
+
+Principais Características
+
+Operações Indivisíveis:
+
+As operações atômicas garantem que uma operação completa seja executada sem interrupções.
+ Isso é útil para evitar condições de corrida (race conditions) sem precisar de mecanismos de bloqueio como mutexes.
+
+Eficiência:
+As operações atômicas são geralmente mais eficientes do que usar mutexes, pois não envolvem bloqueio de goroutines.
+ Elas são implementadas diretamente no nível da CPU, usando instruções especiais.
+
+Tipos Suportados:
+
+O pacote sync/atomic suporta operações atômicas em tipos básicos como int32, int64, uint32, uint64, uintptr, float32, float64 e ponteiros.
+
+Principais Funções
+
+Leitura e Escrita Atômica:
+
+AtomicLoad e AtomicStore são usadas para ler e escrever valores de variáveis de forma atômica.
+
+Exemplo:
+
+var value int32
+atomic.StoreInt32(&value, 42) // Armazena 42 em value de forma atômica
+fmt.Println(atomic.LoadInt32(&value)) // Lê o valor de value de forma atômica
+
+Incremento e Decremento:
+
+AtomicAdd é usada para incrementar ou decrementar valores de forma atômica.
+
+Exemplo:
+
+var counter int32
+atomic.AddInt32(&counter, 1) // Incrementa counter de forma atômica
+fmt.Println(atomic.LoadInt32(&counter)) // Lê o valor de counter de forma atômica
+
+Comparação e Troca:
+
+AtomicCompareAndSwap é usada para comparar e trocar valores de forma atômica. 
+Se o valor atual for igual ao valor esperado, ele é substituído pelo novo valor.
+
+Exemplo:
+
+var value int32 = 42
+atomic.CompareAndSwapInt32(&value, 42, 100) // Se value for 42, substitui por 100
+fmt.Println(atomic.LoadInt32(&value)) // Lê o valor de value de forma atômica
+
+Exemplo de Uso
+
+Aqui está um exemplo de como usar operações atômicas para incrementar um contador de forma segura em um ambiente concorrente:
+
+package main
+
+import (
+	"fmt"
+	"sync/atomic"
+	"time"
+)
+
+func main() {
+	var counter int32
+
+	// Função que incrementa o contador de forma atômica
+	increment := func() {
+		for i := 0; i < 1000; i++ {
+			atomic.AddInt32(&counter, 1)
+		}
+	}
+
+	// Criando várias goroutines para incrementar o contador
+	for i := 0; i < 100; i++ {
+		go increment()
+	}
+
+	// Aguardando um tempo para garantir que todas as goroutines terminem
+	time.Sleep(1 * time.Second)
+	fmt.Println("Final Counter:", atomic.LoadInt32(&counter))
+}
+
+Explicação do Exemplo
+
+Variáveis Compartilhadas:
+
+counter é uma variável compartilhada que várias goroutines podem acessar e modificar.
+
+Função increment:
+
+A função increment incrementa o contador 1000 vezes usando a operação atômica atomic.AddInt32.
+
+Goroutines:
+
+Várias goroutines são criadas para chamar a função increment simultaneamente.
+O uso de atomic.AddInt32 garante que cada incremento seja executado de forma atômica, evitando condições de corrida.
+
+Aguardando o Fim das Goroutines:
+
+time.Sleep(1 * time.Second) é usado para garantir que todas as goroutines tenham tempo suficiente para executar.
+ Em um código real, é melhor usar sincronização explícita, como sync.WaitGroup, para aguardar o término das goroutines.
+
+Conclusão
+
+As operações atômicas fornecidas pelo pacote sync/atomic são uma ferramenta poderosa para manipular variáveis de forma segura em um ambiente concorrente,
+ sem a necessidade de mutexes. Elas são especialmente úteis para operações simples como incremento,
+ decremento e comparação e troca, garantindo eficiência e segurança.

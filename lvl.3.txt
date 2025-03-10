@@ -1,0 +1,137 @@
+### Prática: exercícios  lvl-3 Golang- Mike Jonathan - 29/08/2024...
+
+link do começo do lvl 3 -  https://youtu.be/1G-tbQ6UE_A?si=os4fxwRzvaKVN0eR
+
+##########  Fluxo de Controle ##############
+
+– 1. Entendendo fluxo de controle
+Computadores lêem programas de uma certa maneira, do mesmo jeito que nós lemos livros, por exemplo, de uma certa maneira.
+- Quando nós ocidentais lemos livros, lemos da frente pra trás, da esquerda pra direito, de cima pra baixo.
+- Computadores lêem de cima pra baixo.
+- Ou seja, sua leitura é sequencial. Isso chama-se fluxo de controle sequencial.
+- Alem do fluxo de controle sequencial, há duas declarações que podem afetar como o computador lê o código:
+    - Uma delas é o fluxo de controle de repetição (loop). Nesse caso, o computador vai repetir a leitura de um mesmo código de uma maneira específica. O fluxo de controle de repetição tambem é conhecido como fluxo de controle iterativo.
+    - E o outro é o fluxo de controle condicional, ou fluxo de controle de seleção. Nesse caso o computador encontra uma condição e, através de uma declaração if ou switch, toma um curso ou outro dependendo dessa condição.
+- Ou seja, há três tipos de fluxo de controle: sequencial, de repetição e condicional.
+
+- Nesse capítulo:
+    - Sequencial
+    - Iterativo (loop)
+        - for: inicialização, condição, pós
+        - for: hierarquicamente
+        - for: condição ("while")
+        - for: ...ever?
+        - for: break
+        - for: continue
+    - Condicional
+        - declarações switch/case/default
+            - não há fall-through por padrão
+            - criando fall-through
+            - default
+            - múltiplos casos
+            - casos podem ser expressões
+                - se resultarem em true, rodam
+            - tipo
+        - if
+            - bool
+            - o operador "!"
+            - declaração de inicialização
+            - if, else
+            - if, else if, else
+            - if, else if, else if, ..., else
+
+
+
+2. Loops: inicialização, condição, pós.
+
+- For
+    - Inicialização, condição, pós
+    - Ponto e vírgula?
+    - gobyexample.com
+    - Não existe while!
+
+link - https://go.dev/play/p/-tcsHbK9ofu
+
+3. Loops: nested loop (repetição hierárquica)
+
+- For
+	- Repetição hierárquica
+	- Relógio, calendário
+
+### Loops: a declaração for
+
+4. - For: inicialização. condição, pós
+- For: condição ("while")
+- For: ...ever? (http servers)
+- For: break
+- ref/soec#For_statements, effective go
+- (Range vem mais pra frente.)
+
+link - https://go.dev/play/p/yVK-clFL3gs
+
+Loops: a declaração for
+
+
+Fluxo de Controle – 5. Loops: break & continue
+
+link - https://go.dev/play/p/DAIyXS2BdPb
+
+Fluxo de Controle – 6. Loops: utilizando ascii
+
+- Desafio
+- Format printing:
+- Decimal  %d
+- Hexadecimal %#x
+- Binário %b
+- Octal %o
+- Unicode  %#U
+- Tab      \t
+- Linha nova \n
+- Faça um loop dos números 33 a 122, e utilize format printing para demonstrá-los como texto/string.
+
+link - https://go.dev/play/p/Y-1Okfrpeqa
+
+Fluxo de Controle – 7. Condicionais: a declaração if
+
+- If : boll
+- If : o operador nao "!"
+- If : declaração de inicialização
+
+link -  https://go.dev/play/p/krXm-P5ev8S
+
+Condicionais if, else if, else
+
+- If, else  // if - caso alguma coisa, faça isso// else - caso contrario, faça outra coisa.
+- If, else if, else // - if caso alguma coisa faça isso // - if else  caso outra coisa faça isso // - else  caso nehuma das anteriores faça isso.
+- If, else if, else if, else  // - if caso uma coisa faça isso// else if  caso outra faça outra // else if caso outra faça outra ...
+- If, else if, else if, else if, else...
+
+link - https://go.dev/play/p/WaNQNnNP1Jj
+
+
+Condicionais: a declaração switch
+
+ - Switch:
+    - pode avaliar uma expressão
+        - switch statement == case (value)
+        - default switch statement == true (bool)
+    - não há fall-through
+    - default
+    - cases compostos
+Link - https://go.dev/play/p/0AG44DNElE8
+link complemento -  n 
+#### Condicionais: a declaração switch pt. 2 & documentação
+
+    - pode avaliar tipos
+    - pode haver expressão de inicialização
+
+
+#### Operadores lógicos conficionais
+
+- &&
+- !!
+- !
+-   Qual o resultado de fmt.Println...  
+-   Qual a diferença de fmt.Print, println e printf?
+    -// print imprime sem a quebra de linha; println imprime com a quebra de linha,
+    //printf permite formatação, como vc mesmo disse. Herança do C.

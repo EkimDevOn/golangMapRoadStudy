@@ -1,0 +1,71 @@
+
+                                STRUCT 
+
+struct – 1 é um tipo de dado, e nos permite armazenar tbm dados com tipos diferentes type[string, int, bool, float ] é um tipo simples e fácil de usar
+porém requer um pouco de atenção usaremos praticamente toda hr...
+
+Quando declaramos struct, devemos declarar qual tipo de dados queremos dentro do struct
+-exemplo- https://go.dev/play/p/wtQzBhseANz 
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+struct – 2 embutidos - nada mais é que um struct dentro de outro struct mesma coisa do slices dentro de slices
+-exemplo- https://go.dev/play/p/1R0WNlnSV39
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Structs – 3. anônimo- é um struct que não declara o type, simplesmente mostra a estrutura e cria um valor que tem aquela estrutura e ponto.
+E vc nao pode reutilizar aquilo varias vezes, é descartável.
+exemplo - https://go.dev/play/p/sPzNCRJN8MC
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+- Exercícios - Crie um tipo "pessoa" com tipo subjacente struct que possa conter os seguintes campos:
+    - Nome
+    - Sobrenome
+    - Sabores favoritos de sorvete crie dois valores do tipo "pessoa" e demonste  estes valores,
+    utilizando range da slice  qie conte, os sabores de sorvete .
+    - solução -  https://go.dev/play/p/Bas9d4wHOHv
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+- Utilizando a solução anterior, coloque os valores do tipo "pessoa" num map, utilizando os sobrenomes como key.
+    -  Demonstre os valores do map utilizando range.
+    - Os diferentes sabores do map utilizando range.
+    - Os diferentes sabores devem ser demonstrados utilizando outro range anterior, dentro do range anterior.
+    - solução-  https://go.dev/play/p/lpQeqbquE9T
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+- Crie um novo tipo: veículo
+    - O tipo subjacente deve ser struct
+    - Deve conter os campos: portas, cor
+    - Crie dois novos tipos: caminhonete e sedan
+    - O tipos subjacentes devem ser struct
+    - Ambos devem conter "veículo" como strcut embutido
+    - O tipo caminhonete deve conter um campo bool chamado "quatroRodas"
+    - O tipo sedan deve conter um campo bool chamado "modeloLuxo"
+
+- Usando os structs veículo, caminhonete e sedan:
+    - Usando composite literal, crie um valor de tipo caminhonete e dè valores a seus campos
+    - Usando composite literal, crie uma valor de tipo sedan e dê valores a seus campos
+    - Demonstre estes valores.
+    - Demonstre um único campo de cada um dos dois.
+
+    -solução: - https://go.dev/play/p/AVuizD_e-v9
+
+- aula - https://youtu.be/ji14zPQgmN8?list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+- Crie e use um struct anônimo.
+- Dentro do struct tenha um valor de tipo map e outro do tipo slice
+- Acessando e demonstrando os valores do struct anônimo
+- Acesse valores específicos
+- solução - https://go.dev/play/p/i9CI6ol8dEa
+

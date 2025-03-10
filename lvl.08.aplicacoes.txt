@@ -1,0 +1,1308 @@
+
+
+Já entendemos ponteiros, já entendemos métodos. Já temos o conhecimento necessário para começar a utilizar a standard library.
+Nesse vídeo faremos uma orientação sobre como abordar a documentação.
+Essa aula não foi preparada. Vai ser tudo ao vivo no improviso pra vocês verem como funciona o processo.
+golang.org → Documents → Package Documentation 
+godoc.org → encoding/json
+files
+examples
+funcs
+types
+methods
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Aplicações – 2. JSON marshal (ordenação)
+
+Exemplo: transformando structs em Go em código JSON.
+No improviso tambem.
+Go Playground: https://go.dev/play/p/K3qEIXsXf9n
+
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type Person struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+	City string `json:"city"`
+}
+
+func main() {
+	p := Person{Name: "John", Age: 30, City: "New York"}
+	jsonData, err := json.Marshal(p)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(string(jsonData))
+}
+
+Saída:
+
+json
+
+{"name":"John","age":30,"city":"New York"}
+
+//////////////////////////////////////////////////////////////
+
+Ordenando as Chaves do JSON
+Se você precisar de controle sobre a ordem das chaves, uma abordagem comum é usar um map[string]interface{}
+ e ordenar as chaves manualmente antes de serializar para JSON. Aqui está um exemplo de como fazer isso:
+
+
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"sort"
+)
+
+func main() {
+	data := map[string]interface{}{
+		"name": "John",
+		"age":  30,
+		"city": "New York",
+	}
+
+	// Extrair e ordenar as chaves
+	keys := make([]string, 0, len(data))
+	for k := range data {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// Criar um slice de pares chave-valor ordenados
+	orderedData := make([]map[string]interface{}, 0, len(data))
+	for _, k := range keys {
+		orderedData = append(orderedData, map[string]interface{}{k: data[k]})
+	}
+
+	// Serializar para JSON
+	jsonData, err := json.Marshal(orderedData)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(string(jsonData))
+}
+Saída:
+
+json
+
+[{"age":30},{"city":"New York"},{"name":"John"}]
+Neste exemplo, as chaves são ordenadas alfabeticamente antes de serializar para JSON. No entanto, note que o resultado é um array de objetos, onde cada objeto contém uma única chave-valor.
+ Isso ocorre porque a ordem das chaves em um objeto JSON não é garantida pela especificação JSON.
+
+Se você precisar de um objeto JSON com chaves ordenadas, você pode usar uma biblioteca externa como github.com/iancoleman/orderedmap, que fornece um tipo OrderedMap que mantém a ordem das chaves.
+
+Usando github.com/iancoleman/orderedmap
+
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/iancoleman/orderedmap"
+)
+
+func main() {
+	o := orderedmap.New()
+	o.Set("name", "John")
+	o.Set("age", 30)
+	o.Set("city", "New York")
+
+	jsonData, err := json.Marshal(o)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(string(jsonData))
+}
+Saída:
+
+json
+
+{"name":"John","age":30,"city":"New York"}
+Neste exemplo, o OrderedMap garante que as chaves sejam mantidas na ordem em que foram inseridas, e o json.Marshal serializa o mapa ordenado corretamente.
+
+Conclusão
+Por padrão, json.Marshal não ordena as chaves do JSON.
+
+Se você precisar de ordem específica, pode ordenar manualmente as chaves ou usar uma biblioteca como orderedmap.
+
+A escolha da abordagem depende das suas necessidades específicas e da complexidade da estrutura de dados que você está serializando.
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+Aplicações – 3. JSON unmarshal (desordenação)
+
+E agora o contrário.
+JSON-to-Go
+Tags
+Marshal/unmarshal vs. encoder/decoder
+Marshal vai pra uma variável
+Encoder "vai direto"
+Go Playground: https://play.golang.org/p/l6wbuLu1NS
+Com Encoder: https://play.golang.org/p/Pgwr0O07aL
+
+
+
+type Address struct {
+    Street string `json:"street"`
+    City   string `json:"city"`
+    State  string `json:"state"`
+    Zip    string `json:"zip"`
+}
+
+type PhoneNumber struct {
+    Type   string `json:"type"`
+    Number string `json:"number"`
+}
+
+type Person struct {
+    Name         string        `json:"name"`
+    Age          int           `json:"age"`
+    Email        string        `json:"email"`
+    Address      Address       `json:"address"`
+    PhoneNumbers []PhoneNumber `json:"phoneNumbers"`
+}
+
+func main() {
+    jsonData := `{
+        "name": "John Doe",
+        "age": 30,
+        "email": "johndoe@example.com",
+        "address": {
+            "street": "123 Main St",
+            "city": "Anytown",
+            "state": "CA",
+            "zip": "12345"
+        },
+        "phoneNumbers": [
+            {"type": "home", "number": "555-555-5555"},
+            {"type": "work", "number": "555-555-1234"}
+        ]
+    }`
+
+    var person Person
+    err := json.Unmarshal([]byte(jsonData), &person)
+    if err != nil {
+        fmt.Println("Error unmarshalling JSON:", err)
+        return
+    }
+
+    fmt.Printf("Name: %s\n", person.Name)
+    fmt.Printf("Age: %d\n", person.Age)
+    fmt.Printf("Email: %s\n", person.Email)
+    fmt.Printf("Address: %s, %s, %s %s\n", person.Address.Street, person.Address.City, person.Address.State, person.Address.Zip)
+    for _, phone := range person.PhoneNumbers {
+        fmt.Printf("Phone (%s): %s\n", phone.Type, phone.Number)
+    }
+}
+
+Explicação
+Definição das Structs: As structs Address, PhoneNumber, e Person são definidas para mapear a estrutura do JSON. As tags json:"field" são usadas para associar os campos da struct com as chaves do JSON.
+
+Unmarshal: A função json.Unmarshal é usada para converter o JSON (que é uma string) em uma instância da struct Person.
+ O primeiro argumento é o JSON em formato de []byte, e o segundo argumento é um ponteiro para a struct onde os dados serão armazenados.
+
+Manipulação dos Dados: Após o unmarshal, os dados podem ser acessados e manipulados como qualquer outra struct em Go.
+
+Saída Esperada
+Ao executar o código acima, a saída será:
+
+
+Name: John Doe
+Age: 30
+Email: johndoe@example.com
+Address: 123 Main St, Anytown, CA 12345
+Phone (home): 555-555-5555
+Phone (work): 555-555-1234
+
+
+Considerações
+Tipos de Dados: Certifique-se de que os tipos de dados na struct correspondam aos tipos de dados no JSON. Por exemplo, se um campo no JSON for um número, mas você defini o campo na struct como uma string, o unmarshal falhará.
+
+Campos Opcionais: Se um campo no JSON for opcional, você pode usar ponteiros na struct para lidar com campos que podem ser null ou ausentes.
+
+Erros: Sempre verifique o erro retornado por json.Unmarshal para garantir que o processo de unmarshal foi bem-sucedido.
+
+Esse é um exemplo básico, mas o processo de unmarshal em Go é bastante poderoso e pode ser usado para lidar com estruturas JSON complexas.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+tags:
+
+Em Go, as tags são usadas para adicionar metadados aos campos de uma struct. No contexto de JSON, as tags são frequentemente usadas para mapear os campos de uma struct para as chaves de um JSON, especialmente quando os nomes dos campos na struct não correspondem exatamente às chaves do JSON.
+
+Aqui estão alguns exemplos de structs com campos e tags:
+
+Exemplo 1: Struct Simples com Tags Básicas
+
+type User struct {
+    ID        int    `json:"id"`                  // Mapeia o campo "ID" para a chave "id" no JSON
+    Name      string `json:"name"`               // Mapeia o campo "Name" para a chave "name" no JSON
+    Email     string `json:"email"`              // Mapeia o campo "Email" para a chave "email" no JSON
+    IsActive  bool   `json:"is_active"`          // Mapeia o campo "IsActive" para a chave "is_active" no JSON
+    CreatedAt string `json:"created_at"`         // Mapeia o campo "CreatedAt" para a chave "created_at" no JSON
+}
+JSON Correspondente:
+json
+Copy
+{
+    "id": 1,
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "is_active": true,
+    "created_at": "2023-10-01T12:00:00Z"
+}
+
+
+
+
+Exemplo 2: Struct com Campos Aninhados
+
+type Address struct {
+    Street  string `json:"street"`               // Mapeia o campo "Street" para a chave "street" no JSON
+    City    string `json:"city"`                 // Mapeia o campo "City" para a chave "city" no JSON
+    Country string `json:"country"`              // Mapeia o campo "Country" para a chave "country" no JSON
+}
+
+type Customer struct {
+    ID      int     `json:"id"`                  // Mapeia o campo "ID" para a chave "id" no JSON
+    Name    string  `json:"name"`               // Mapeia o campo "Name" para a chave "name" no JSON
+    Address Address `json:"address"`            // Mapeia o campo "Address" para a chave "address" no JSON
+}
+JSON Correspondente:
+json
+Copy
+{
+    "id": 1,
+    "name": "Jane Smith",
+    "address": {
+        "street": "456 Elm St",
+        "city": "Springfield",
+        "country": "USA"
+    }
+}
+
+
+
+Exemplo 3: Campos Opcionais com Ponteiros
+Se um campo no JSON for opcional (pode estar ausente ou ser null), você pode usar ponteiros na struct.
+
+
+type Product struct {
+    ID          int     `json:"id"`              // Mapeia o campo "ID" para a chave "id" no JSON
+    Name        string  `json:"name"`           // Mapeia o campo "Name" para a chave "name" no JSON
+    Description *string `json:"description"`    // Mapeia o campo "Description" para a chave "description" no JSON (pode ser nulo)
+    Price       float64 `json:"price"`          // Mapeia o campo "Price" para a chave "price" no JSON
+}
+JSON Correspondente:
+json
+Copy
+{
+    "id": 101,
+    "name": "Laptop",
+    "price": 999.99
+}
+Neste caso, o campo Description pode estar ausente no JSON, e o valor será nil na struct.
+
+
+
+Exemplo 4: Ignorar Campos
+Você pode usar a tag json:"-" para ignorar um campo durante o marshal/unmarshal.
+
+
+type Account struct {
+    ID       int    `json:"id"`                 // Mapeia o campo "ID" para a chave "id" no JSON
+    Username string `json:"username"`          // Mapeia o campo "Username" para a chave "username" no JSON
+    Password string `json:"-"`                 // Ignora o campo "Password" no JSON
+}
+JSON Correspondente:
+json
+Copy
+{
+    "id": 1,
+    "username": "john doe"
+}
+O campo Password não será incluído no JSON gerado nem será preenchido durante o unmarshal.
+
+
+
+Exemplo 5: Campos com Nomes Diferentes no JSON
+Se o nome do campo na struct for diferente da chave no JSON, você pode usar a tag para fazer o mapeamento.
+
+
+type Employee struct {
+    EmployeeID int    `json:"employee_id"`      // Mapeia o campo "EmployeeID" para a chave "employee_id" no JSON
+    FullName   string `json:"full_name"`       // Mapeia o campo "FullName" para a chave "full_name" no JSON
+    Department string `json:"department"`      // Mapeia o campo "Department" para a chave "department" no JSON
+}
+JSON Correspondente:
+json
+Copy
+{
+    "employee_id": 123,
+    "full_name": "Alice Johnson",
+    "department": "Engineering"
+}
+
+
+
+
+Exemplo 6: Campos com Valores Padrão
+Se um campo estiver ausente no JSON, ele será inicializado com o valor zero do tipo (por exemplo, 0 para int, "" para string, false para bool, etc.).
+Você pode usar tags para definir comportamentos personalizados.
+
+
+type Settings struct {
+    Theme    string `json:"theme"`             // Mapeia o campo "Theme" para a chave "theme" no JSON
+    Notify   bool   `json:"notify"`            // Mapeia o campo "Notify" para a chave "notify" no JSON
+    Language string `json:"language,omitempty"` // O campo "Language" será omitido se estiver vazio
+}
+
+JSON Correspondente:
+
+{
+    "theme": "dark",
+    "notify": true
+}
+Se o campo Language estiver vazio, ele não será incluído no JSON.
+
+
+
+Exemplo 7: Campos com Tipos Personalizados
+Você pode usar tipos personalizados (como time.Time) e ainda usar tags para mapear corretamente.
+
+
+import "time"
+
+type Event struct {
+    ID        int       `json:"id"`             // Mapeia o campo "ID" para a chave "id" no JSON
+    Name      string    `json:"name"`          // Mapeia o campo "Name" para a chave "name" no JSON
+    StartTime time.Time `json:"start_time"`    // Mapeia o campo "StartTime" para a chave "start_time" no JSON
+}
+
+JSON Correspondente:
+
+{
+    "id": 1,
+    "name": "Conference",
+    "start_time": "2023-10-01T09:00:00Z"
+}
+
+
+
+Resumo das Tags Comuns
+Tag	Descrição
+json:"field_name"	Mapeia o campo para a chave field_name no JSON.
+json:"-"	Ignora o campo durante o marshal/unmarshal.
+json:",omitempty"	O campo será omitido no JSON se estiver vazio (valor zero).
+json:"field_name,string"	Converte o campo para uma string no JSON (útil para números, por exemplo).
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+UTILIZANDO  função encoder que é diferente da marshal
+
+de struct Go para Json - https://go.dev/play/p/LxyEqgwNYyP
+
+mais detalhado: 
+
+Em Go, tanto json.Marshal quanto json.Encoder são usados para converter dados em formato JSON, mas eles têm propósitos e comportamentos ligeiramente diferentes. Vamos explorar as diferenças entre eles:
+
+1. json.Marshal
+O json.Marshal é uma função que converte uma struct, map, slice ou qualquer outro tipo de dado em Go para um JSON no formato de []byte (uma slice de bytes).
+Ele é útil quando você precisa gerar um JSON e armazená-lo em uma variável ou manipulá-lo como bytes.
+
+Exemplo de Uso:
+
+package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type Person struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+
+func main() {
+    p := Person{Name: "John Doe", Age: 30}
+
+    // Convertendo a struct para JSON ([]byte)
+    jsonData, err := json.Marshal(p)
+    if err != nil {
+        fmt.Println("Error marshalling JSON:", err)
+        return
+    }
+
+    // Exibindo o JSON como string
+    fmt.Println(string(jsonData))
+}
+Saída:
+json
+
+{"name":"John Doe","age":30}
+Características:
+Retorna um []byte contendo o JSON.
+
+Útil quando você precisa armazenar o JSON em uma variável ou manipulá-lo como bytes.
+
+Não é direcionado para saída direta (como em uma conexão de rede ou arquivo), a menos que você escreva os bytes manualmente.
+
+2. json.Encoder
+O json.Encoder é uma struct que permite escrever JSON diretamente em um io.Writer, como um arquivo, uma conexão de rede (http.ResponseWriter), ou qualquer outra saída que implemente a interface io.Writer.
+ Ele é mais eficiente quando você precisa enviar o JSON diretamente para uma saída sem armazená-lo em memória.
+
+Exemplo de Uso:
+
+package main
+
+import (
+    "encoding/json"
+    "os"
+)
+
+type Person struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+
+func main() {
+    p := Person{Name: "John Doe", Age: 30}
+
+    // Criando um encoder que escreve diretamente em os.Stdout (terminal)
+    encoder := json.NewEncoder(os.Stdout)
+
+    // Convertendo a struct para JSON e escrevendo diretamente na saída
+    err := encoder.Encode(p)
+    if err != nil {
+        println("Error encoding JSON:", err)
+        return
+    }
+}
+Saída:
+json
+
+{"name":"John Doe","age":30}
+
+
+Características:
+Escreve o JSON diretamente em um io.Writer (como um arquivo, conexão de rede, etc.).
+
+Mais eficiente em termos de memória, pois não armazena o JSON inteiro em uma variável.
+
+Ideal para streaming de dados JSON (por exemplo, em APIs HTTP ou ao escrever em arquivos grandes).
+
+Comparação entre json.Marshal e json.Encoder
+Característica	json.Marshal	json.Encoder
+Formato de Saída	Retorna um []byte (slice de bytes).	Escreve diretamente em um io.Writer.
+Uso de Memória	Armazena o JSON inteiro em memória.	Não armazena o JSON em memória (streaming).
+Caso de Uso	Útil para manipulação de JSON em memória.	Útil para enviar JSON diretamente para saídas (arquivos, redes, etc.).
+Facilidade de Uso	Simples para pequenos JSONs.	Mais eficiente para grandes volumes de dados.
+Performance	Pode ser menos eficiente para grandes JSONs.	Mais eficiente para grandes JSONs ou streaming.
+Quando Usar Cada Um?
+Use json.Marshal quando:
+
+Você precisa armazenar o JSON em uma variável para manipulação posterior.
+
+Está trabalhando com JSONs pequenos ou médios.
+
+Precisa do JSON como []byte para outras operações.
+
+Use json.Encoder quando:
+
+Você precisa enviar o JSON diretamente para uma saída (como um arquivo, conexão HTTP, etc.).
+
+Está lidando com grandes volumes de dados e quer evitar o uso excessivo de memória.
+
+Precisa de streaming de dados JSON.
+
+Exemplo Prático com json.Encoder em uma API HTTP
+Aqui está um exemplo de como usar json.Encoder para enviar uma resposta JSON em uma API HTTP:
+
+
+package main
+
+import (
+    "encoding/json"
+    "net/http"
+)
+
+type Person struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    p := Person{Name: "John Doe", Age: 30}
+
+    // Configurando o header para indicar que a resposta é JSON
+    w.Header().Set("Content-Type", "application/json")
+
+    // Usando json.Encoder para escrever o JSON diretamente na resposta HTTP
+    encoder := json.NewEncoder(w)
+    err := encoder.Encode(p)
+    if err != nil {
+        http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+        return
+    }
+}
+
+func main() {
+    http.HandleFunc("/", handler)
+    http.ListenAndServe(":8080", nil)
+}
+
+
+Neste exemplo, o json.Encoder é usado para enviar o JSON diretamente para o http.ResponseWriter, sem a necessidade de armazenar o JSON em memória.
+
+Conclusão
+json.Marshal: Use quando precisar de um JSON em formato de []byte para manipulação em memória.
+
+json.Encoder: Use quando precisar enviar JSON diretamente para uma saída (arquivo, rede, etc.) ou para evitar o uso excessivo de memória com grandes volumes de dados.
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Aplicações – 4. A interface Writer
+
+A interface writer do pacote io.
+type Writer interface { Write(p []byte) (n int, err error) }
+pkg os:   func (f *File) Write(b []byte) (n int, err error)
+pkg json: func NewEncoder(w io.Writer) *Encoder
+"Println [...] writes to standard output."
+func Println [...] return Fprintln(os.Stdout, a...)
+func Fprintln(w io.Writer, a ...interface{}) (n int, err error)
+Stdout: NewFile(uintptr(syscall.Stdout), "/dev/stdout") (Google: Standard streams)
+func NewFile(fd uintptr, name string) *File
+func (f *File) Write(b []byte) (n int, err error)
+Exemplo:
+Println
+Fprintln os.Stdout
+io.WriteString os.Stdout
+Ou:
+func Dial(network, address string) (Conn, error)
+type Conn interface { [...] Write(b []byte) (n int, err error) [...] }
+
+MAIS EXEMPLOS MAIS DETALHADOS :
+
+
+
+A interface io.Writer é uma das interfaces mais importantes e amplamente utilizadas em Go. Ela define um contrato para tipos que podem receber e processar streams de dados.
+ Em termos simples, qualquer tipo que implemente a interface Writer pode ser usado para escrever dados, seja em um arquivo, uma conexão de rede, um buffer na memória, ou qualquer outro destino que aceite dados.
+
+Definição da Interface Writer
+A interface Writer é definida no pacote io da seguinte forma:
+
+
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+Write(p []byte): Este método recebe uma slice de bytes ([]byte) como entrada.
+
+Retorno:
+
+n int: O número de bytes escritos.
+
+err error: Um erro, se ocorrer algum problema durante a escrita.
+
+Qualquer tipo que implemente esse método satisfaz a interface Writer.
+
+Como Funciona?
+Quando você chama o método Write, os dados (em forma de []byte) são enviados para o destino subjacente. Por exemplo:
+
+Se o Writer for um arquivo, os dados são escritos no arquivo.
+
+Se o Writer for uma conexão de rede, os dados são enviados pela rede.
+
+Se o Writer for um buffer na memória, os dados são armazenados no buffer.
+
+Exemplos de Tipos que Implementam Writer
+Muitos tipos em Go implementam a interface Writer. Aqui estão alguns exemplos comuns:
+
+
+
+1. Arquivos (os.File)
+O tipo os.File implementa Writer, permitindo que você escreva dados em arquivos.
+
+file, err := os.Create("output.txt")
+if err != nil {
+    log.Fatal(err)
+}
+defer file.Close()
+
+data := []byte("Hello, World!")
+n, err := file.Write(data)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Wrote %d bytes to file\n", n)
+
+
+
+2. Buffer na Memória (bytes.Buffer)
+O tipo bytes.Buffer implementa Writer, permitindo que você armazene dados em um buffer na memória.
+
+var buf bytes.Buffer
+data := []byte("Hello, Buffer!")
+n, err := buf.Write(data)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Wrote %d bytes to buffer: %s\n", n, buf.String())
+
+
+
+3. Conexões de Rede (net.Conn)
+O tipo net.Conn (usado em conexões TCP, UDP, etc.) implementa Writer, permitindo que você envie dados pela rede.
+
+conn, err := net.Dial("tcp", "example.com:80")
+if err != nil {
+    log.Fatal(err)
+}
+defer conn.Close()
+
+data := []byte("GET / HTTP/1.0\r\n\r\n")
+n, err := conn.Write(data)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Sent %d bytes over the network\n", n)
+
+
+4. Respostas HTTP (http.ResponseWriter)
+Em servidores HTTP, o tipo http.ResponseWriter implementa Writer, permitindo que você envie respostas para o cliente.
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    data := []byte("Hello, HTTP!")
+    n, err := w.Write(data)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("Sent %d bytes in HTTP response\n", n)
+}
+
+
+5. Compressão (gzip.Writer)
+O tipo gzip.Writer implementa Writer, permitindo que você escreva dados comprimidos.
+
+file, err := os.Create("output.gz")
+if err != nil {
+    log.Fatal(err)
+}
+defer file.Close()
+
+gz := gzip.NewWriter(file)
+defer gz.Close()
+
+data := []byte("Hello, Gzip!")
+n, err := gz.Write(data)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Wrote %d bytes to gzip file\n", n)
+
+
+Por que a Interface Writer é Importante?
+A interface Writer é fundamental em Go porque:
+
+Abstração: Ela permite que você escreva código genérico que funciona com qualquer tipo que implemente Writer, sem se preocupar com o destino específico dos dados (arquivo, rede, buffer, etc.).
+
+Composição: Muitas bibliotecas em Go aceitam Writer como parâmetro, o que facilita a composição de funcionalidades (por exemplo, escrever em um arquivo comprimido com gzip).
+
+Flexibilidade: Você pode criar seus próprios tipos que implementam Writer para personalizar o comportamento de escrita.
+
+Exemplo de Uso com json.Encoder
+A interface Writer é usada em muitas funções e tipos da biblioteca padrão, como o json.Encoder. Aqui está um exemplo:
+
+
+package main
+
+import (
+    "encoding/json"
+    "os"
+)
+
+type Person struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+
+func main() {
+    p := Person{Name: "John Doe", Age: 30}
+
+    // Usando os.Stdout como Writer (saída no terminal)
+    encoder := json.NewEncoder(os.Stdout)
+
+    // Escrevendo o JSON diretamente no Writer
+    err := encoder.Encode(p)
+    if err != nil {
+        println("Error encoding JSON:", err)
+        return
+    }
+}
+
+Neste exemplo:
+
+os.Stdout é um Writer que escreve no terminal.
+
+O json.Encoder usa o Writer para enviar o JSON diretamente para a saída.
+
+Criando seu Próprio Writer
+Você pode criar seus próprios tipos que implementam a interface Writer. Por exemplo, um Writer que conta o número de bytes escritos:
+
+
+type ByteCounter struct {
+    TotalBytes int
+}
+
+func (bc *ByteCounter) Write(p []byte) (n int, err error) {
+    n = len(p)
+    bc.TotalBytes += n
+    return n, nil
+}
+
+func main() {
+    var counter ByteCounter
+
+    data := []byte("Hello, Custom Writer!")
+    n, err := counter.Write(data)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("Wrote %d bytes. Total bytes: %d\n", n, counter.TotalBytes)
+}
+
+Resumo
+A interface Writer é usada para escrever dados em um destino (arquivo, rede, buffer, etc.).
+
+Muitos tipos em Go implementam Writer, como os.File, bytes.Buffer, net.Conn, e http.ResponseWriter.
+
+Ela permite escrever código genérico e flexível que funciona com qualquer tipo que implemente Writer.
+
+É amplamente usada em bibliotecas da linguagem, como json.Encoder, gzip.Writer, e muitas outras.
+
+/////////////////////////////////////////////////////
+
+determinado tipo implementa uma determinada interface
+
+
+////////////////////////////////////////////////////////
+
+Aplicações – 5. O pacote sort
+
+
+Sort serve para ordenar slices.
+Como faz?
+golang.org/pkg/ → sort
+godoc.org/sort → examples
+Sort altera o valor original!
+Exemplo: Ints, Strings.
+Go Playground: 
+sort.Strings: https://play.golang.org/p/Rs1NVwmg7h
+sort.Ints: https://play.golang.org/p/I2_vsHujZa
+Transcrição
+
+MAIS DETALHADO :
+
+O pacote sort em Go fornece funcionalidades para ordenar slices e coleções de dados. Ele é bastante flexível e permite ordenar tanto tipos nativos (como int, float64, string) quanto tipos personalizados (como structs). 
+Vamos explorar como usar o pacote sort com exemplos práticos.
+
+Funcionalidades Principais do Pacote sort
+Ordenação de Slices de Tipos Nativos:
+
+O pacote sort oferece funções prontas para ordenar slices de tipos como int, float64, e string.
+
+Ordenação de Slices de Tipos Personalizados:
+
+Para ordenar slices de tipos personalizados (como structs), você precisa implementar a interface sort.Interface.
+
+Funções Úteis:
+
+sort.Ints, sort.Float64s, sort.Strings: Ordenam slices de int, float64, e string, respectivamente.
+
+sort.Slice: Ordena uma slice com base em uma função de comparação personalizada.
+
+sort.Search: Realiza uma busca binária em uma slice ordenada.
+
+Exemplos de Uso
+1. Ordenando Slices de Tipos Nativos
+O pacote sort oferece funções prontas para ordenar slices de tipos nativos:
+
+
+package main
+
+import (
+    "fmt"
+    "sort"
+)
+
+func main() {
+    // Ordenando uma slice de inteiros
+    ints := []int{4, 2, 7, 1, 9}
+    sort.Ints(ints)
+    fmt.Println("Sorted ints:", ints)
+
+    // Ordenando uma slice de floats
+    floats := []float64{3.2, 1.5, 4.8, 1.0}
+    sort.Float64s(floats)
+    fmt.Println("Sorted floats:", floats)
+
+    // Ordenando uma slice de strings
+    strings := []string{"banana", "apple", "cherry"}
+    sort.Strings(strings)
+    fmt.Println("Sorted strings:", strings)
+}
+Saída:
+
+Copy
+Sorted ints: [1 2 4 7 9]
+Sorted floats: [1 1.5 3.2 4.8]
+Sorted strings: [apple banana cherry]
+
+2. Ordenando Slices de Tipos Personalizados
+Para ordenar slices de tipos personalizados (como structs), você precisa implementar a interface sort.Interface, que exige três métodos:
+
+Len() int: Retorna o tamanho da slice.
+
+Less(i, j int) bool: Define a ordem dos elementos.
+
+Swap(i, j int): Troca os elementos de posição.
+
+Aqui está um exemplo:
+
+
+package main
+
+import (
+    "fmt"
+    "sort"
+)
+
+type Person struct {
+    Name string
+    Age  int
+}
+
+// ByAge implementa sort.Interface para []Person com base no campo Age.
+type ByAge []Person
+
+func (a ByAge) Len() int           { return len(a) }
+func (a ByAge) Less(i, j int) bool { return a[i].Age < a[j].Age }
+func (a ByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func main() {
+    people := []Person{
+        {"Alice", 25},
+        {"Bob", 30},
+        {"Charlie", 20},
+    }
+
+    // Ordenando por idade
+    sort.Sort(ByAge(people))
+    fmt.Println("Sorted by age:", people)
+}
+Saída:
+
+Copy
+Sorted by age: [{Charlie 20} {Alice 25} {Bob 30}]
+
+3. Usando sort.Slice para Ordenação Personalizada
+A função sort.Slice permite ordenar uma slice com base em uma função de comparação personalizada, sem a necessidade de implementar sort.Interface.
+
+
+package main
+
+import (
+    "fmt"
+    "sort"
+)
+
+type Person struct {
+    Name string
+    Age  int
+}
+
+func main() {
+    people := []Person{
+        {"Alice", 25},
+        {"Bob", 30},
+        {"Charlie", 20},
+    }
+
+    // Ordenando por idade usando sort.Slice
+    sort.Slice(people, func(i, j int) bool {
+        return people[i].Age < people[j].Age
+    })
+    fmt.Println("Sorted by age:", people)
+
+    // Ordenando por nome
+    sort.Slice(people, func(i, j int) bool {
+        return people[i].Name < people[j].Name
+    })
+    fmt.Println("Sorted by name:", people)
+}
+Saída:
+
+Sorted by age: [{Charlie 20} {Alice 25} {Bob 30}]
+Sorted by name: [{Alice 25} {Bob 30} {Charlie 20}]
+
+4. Busca Binária com sort.Search
+A função sort.Search realiza uma busca binária em uma slice ordenada. Ela retorna a posição onde o elemento deveria estar inserido para manter a ordem.
+
+
+package main
+
+import (
+    "fmt"
+    "sort"
+)
+
+func main() {
+    ints := []int{1, 2, 4, 7, 9}
+
+    // Buscando o índice onde o valor 4 está ou deveria estar
+    index := sort.SearchInts(ints, 4)
+    fmt.Println("Index of 4:", index)
+
+    // Buscando o índice onde o valor 5 deveria estar
+    index = sort.SearchInts(ints, 5)
+    fmt.Println("Index for 5:", index)
+}
+Saída:
+
+Index of 4: 2
+Index for 5: 3
+
+Ordenação Inversa
+Para ordenar em ordem decrescente, você pode inverter a lógica da função Less ou usar sort.Sort com um sort.Reverse.
+
+Exemplo com sort.Reverse:
+
+
+package main
+
+import (
+    "fmt"
+    "sort"
+)
+
+func main() {
+    ints := []int{4, 2, 7, 1, 9}
+
+    // Ordenando em ordem decrescente
+    sort.Sort(sort.Reverse(sort.IntSlice(ints)))
+    fmt.Println("Sorted in reverse order:", ints)
+}
+Saída:
+
+
+Sorted in reverse order: [9 7 4 2 1]
+
+Resumo
+O pacote sort é poderoso e flexível para ordenar slices em Go.
+
+Use sort.Ints, sort.Float64s, e sort.Strings para ordenar slices de tipos nativos.
+
+Para tipos personalizados, implemente a interface sort.Interface ou use sort.Slice com uma função de comparação.
+
+Use sort.Search para buscas binárias em slices ordenadas.
+
+Para ordenação inversa, use sort.Reverse.
+
+
+
+///////////////////////////////////////////////////////////////xxx////////////////////////////
+
+
+Aplicações – 7. bcrypt
+
+
+É uma maneira de encriptar senhas utilizando hashes.
+x/crypto/bcrypt
+GenerateFromPassword
+CompareHashAndPassword
+Sem Go Playground!
+go get golang.org/x/crypto/bcrypt
+Arquivo: https://github.com/ellenkorbes/aprend...
+
+
+
+mais detalhado BCRYPT :
+
+O bcrypt é um algoritmo de hashing amplamente utilizado para armazenar senhas de forma segura. 
+Ele foi projetado especificamente para ser lento e computacionalmente caro, o que ajuda a proteger contra ataques de força bruta.
+Em Go, o pacote golang.org/x/crypto/bcrypt fornece uma implementação fácil de usar do bcrypt.
+
+Vamos explorar como usar o bcrypt em Go, com exemplos práticos.
+
+Por que Usar bcrypt?
+Segurança:
+
+O bcrypt é resistente a ataques de força bruta e rainbow tables.
+
+Ele inclui um "salt" (valor aleatório) automaticamente, o que impede que duas senhas iguais tenham o mesmo hash.
+
+Lentidão Intencional:
+
+O bcrypt é propositalmente lento, o que dificulta ataques de força bruta.
+
+Amplamente Adotado:
+
+É um padrão da indústria para armazenamento seguro de senhas.
+
+Instalação do Pacote bcrypt
+O pacote bcrypt não faz parte da biblioteca padrão do Go, mas pode ser instalado facilmente:
+
+
+go get golang.org/x/crypto/bcrypt
+Exemplos de Uso
+
+1. Gerando um Hash de Senha
+Para gerar um hash de uma senha, use a função bcrypt.GenerateFromPassword.
+
+
+package main
+
+import (
+    "fmt"
+    "golang.org/x/crypto/bcrypt"
+)
+
+func main() {
+    senha := "minhasenha123"
+
+    // Gera um hash da senha
+    hash, err := bcrypt.GenerateFromPassword([]byte(senha), bcrypt.DefaultCost)
+    if err != nil {
+        fmt.Println("Erro ao gerar hash:", err)
+        return
+    }
+
+    fmt.Println("Hash da senha:", string(hash))
+}
+Saída:
+
+
+Hash da senha: $2a$10$3e7U9z8u5e6r5d4e3e2e1e0e1e2e3e4e5e6e7e8e9e0e1e2e3e4e5e6e7e8
+bcrypt.DefaultCost: Define o custo do algoritmo (quanto maior, mais lento e seguro). O valor padrão é 10.
+
+2. Verificando uma Senha
+Para verificar se uma senha corresponde a um hash, use a função bcrypt.CompareHashAndPassword.
+
+
+package main
+
+import (
+    "fmt"
+    "golang.org/x/crypto/bcrypt"
+)
+
+func main() {
+    senha := "minhasenha123"
+    hash := "$2a$10$3e7U9z8u5e6r5d4e3e2e1e0e1e2e3e4e5e6e7e8e9e0e1e2e3e4e5e6e7e8"
+
+    // Verifica se a senha corresponde ao hash
+    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(senha))
+    if err != nil {
+        fmt.Println("Senha incorreta!")
+        return
+    }
+
+    fmt.Println("Senha correta!")
+}
+Saída:
+
+
+Senha correta!
+Se a senha estiver incorreta, bcrypt.CompareHashAndPassword retornará um erro.
+
+3. Aumentando o Custo do Hash
+Você pode aumentar o custo do bcrypt para tornar o hash mais seguro (mas também mais lento para gerar e verificar).
+
+
+package main
+
+import (
+    "fmt"
+    "golang.org/x/crypto/bcrypt"
+)
+
+func main() {
+    senha := "minhasenha123"
+
+    // Aumentando o custo para 14
+    hash, err := bcrypt.GenerateFromPassword([]byte(senha), 14)
+    if err != nil {
+        fmt.Println("Erro ao gerar hash:", err)
+        return
+    }
+
+    fmt.Println("Hash com custo 14:", string(hash))
+}
+Saída:
+
+
+Hash com custo 14: $2a$14$3e7U9z8u5e6r5d4e3e2e1e0e1e2e3e4e5e6e7e8e9e0e1e2e3e4e5e6e7e8
+Como o bcrypt Funciona?
+Salt Automático:
+
+O bcrypt gera automaticamente um salt (valor aleatório) e o inclui no hash. Isso significa que duas senhas iguais terão hashes diferentes.
+
+Custo do Algoritmo:
+
+O custo (cost) controla o número de iterações do algoritmo. Um custo maior torna o hash mais lento e seguro, mas também aumenta o tempo de processamento.
+
+Formato do Hash:
+
+O hash gerado pelo bcrypt inclui todas as informações necessárias para verificar a senha, como o salt e o custo. Por exemplo:
+
+
+$2a$10$3e7U9z8u5e6r5d4e3e2e1e0e1e2e3e4e5e6e7e8e9e0e1e2e3e4e5e6e7e8
+2a: Versão do algoritmo.
+
+10: Custo.
+
+3e7U9z8u5e6r5d4e3e2e1e0e1e2e3e4e5e6e7e8e9e0e1e2e3e4e5e6e7e8: Salt e hash combinados.
+
+Boas Práticas
+Nunca Armazene Senhas em Texto Puro:
+
+Sempre use um algoritmo de hashing como bcrypt para armazenar senhas.
+
+Use um Custo Adequado:
+
+Escolha um custo que equilibre segurança e desempenho. Um custo de 10 a 14 é geralmente recomendado.
+
+Não Use Hash Rápido:
+
+Evite algoritmos rápidos como MD5 ou SHA-1 para hashing de senhas, pois eles são vulneráveis a ataques de força bruta.
+
+Atualize Hashes Periodicamente:
+
+Se o custo do bcrypt aumentar no futuro, você pode regenerar os hashes das senhas dos usuários quando eles fizerem login.
+
+Exemplo Completo: Registro e Login
+Aqui está um exemplo completo de como usar bcrypt em um sistema de registro e login:
+
+
+package main
+
+import (
+    "fmt"
+    "golang.org/x/crypto/bcrypt"
+)
+
+// Simula um banco de dados de usuários
+var userDB = make(map[string][]byte)
+
+func register(username, password string) error {
+    // Gera o hash da senha
+    hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    if err != nil {
+        return err
+    }
+
+    // Armazena o hash no "banco de dados"
+    userDB[username] = hash
+    return nil
+}
+
+func login(username, password string) bool {
+    // Recupera o hash do "banco de dados"
+    hash, exists := userDB[username]
+    if !exists {
+        return false
+    }
+
+    // Verifica se a senha está correta
+    err := bcrypt.CompareHashAndPassword(hash, []byte(password))
+    return err == nil
+}
+
+func main() {
+    // Registra um usuário
+    err := register("alice", "senha123")
+    if err != nil {
+        fmt.Println("Erro no registro:", err)
+        return
+    }
+
+    // Tenta fazer login
+    if login("alice", "senha123") {
+        fmt.Println("Login bem-sucedido!")
+    } else {
+        fmt.Println("Login falhou!")
+    }
+
+    // Tenta fazer login com senha incorreta
+    if login("alice", "senhaerrada") {
+        fmt.Println("Login bem-sucedido!")
+    } else {
+        fmt.Println("Login falhou!")
+    }
+}
+Saída:
+
+Login bem-sucedido!
+Login falhou!
+
+Resumo
+O bcrypt é um algoritmo seguro para armazenamento de senhas.
+
+Use bcrypt.GenerateFromPassword para gerar hashes.
+
+Use bcrypt.CompareHashAndPassword para verificar senhas.
+
+Escolha um custo adequado para equilibrar segurança e desempenho.
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx EXERCÍCIOS xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+1- partindo do código abaixo, utilize marshal para tranformar []user em json.
+ - https://play.golang.org/p/U0jea43X55
+
+- Atenção! Tem pegadinha aqui.
+- Solução: - https://go.dev/play/p/Pb0E01YZzUM
+
+
+
+2- Partindo do código abaixo, utilize unmarshal e demonstre os valores.
+    - https://play.golang.org/p/b_UuCcZag9
+
+- Dica: JSON-to-Go. ####
+- Solução: - https://go.dev/play/p/F8LhaZtFSFY
+
+
+3- Partindo do código abaixo, utilize NewEncoder90 e Encode90 para enviar as informaçoes com JSON para Stdout.
+    - https://play.golang.org/p/BVRZTdlUZ_
+
+-Desafio : descubra o que é, e utilize, method chaining para conectar os dois métodos acima.
+-solução - https://go.dev/play/p/q9m6a-WRxfC
+
+
+4- Partindo do código abaixo, ordene a []int e a []string.
+    - https://play.golang.org/p/H_q75mpmHW
+
+- Solução: - https://go.dev/play/p/vvNGiLMAhdk
+
+
+5- Partindo do código abaixo, ordene os []user por idade e sobrenome.
+ - https://play.golang.org/p/BVRZTdlUZ_
+ - Os valores no campo Sayings devem ser ordenados tambem, e demonstrados de maneira esteticamnete harmoniosa.
+ - solução - https://go.dev/play/p/GZLMqcwcUBt

@@ -1,0 +1,261 @@
+### Prática: exercícios  lvl-2 Golang- Mike Jonathan - 21/08/2024...
+
+link do começo do lvl 2 -  https://www.youtube.com/watch?v=voisg61hPXA
+
+########## Fundamentos da Programação ##############
+
+1. Tipo booleano -
+- Agora vamos explorar os tipos de maneira mais detalhada. golang.org/ref/spec. A começar pelo bool.
+- O tipo bool é um tipo binário, que só pode conter um dos dois valores: true e false. (Verdadeiro ou falso, sim ou não, zero ou um, etc.)
+- Sempre que você ver operadores relacionais, o resultado da expressão será um valor booleano.
+- Booleans são fundamentais nas tomadas de decisões em lógica condicional, declarações switch, declarações if, fluxo de controle, etc.
+- Na prática:
+    - Zero value
+    - Atribuindo um valor
+    - Bool como resultado de operadores relacionais
+
+
+- Go Playground: https://go.dev/play/p/Eea3Ow2jSBD
+
+
+
+########## Fundamentos da Programação – 2. Como os computadores funcionam ##############
+
+- Daqui pra frente vamos falar de ints, bytes, e etc.
+
+https://en.wikipedia.org/wiki/ASCII
+
+https://youtu.be/rjBuymn8Gm8?si=0R-hh78G4HJ7PNTg 
+
+
+
+ Como funcionam os computadores
+
+ - Computadores funcionam com eletricidade
+ - Eletriciade pode estar ligada ou desligada
+ - Eletricidade é convertida em 1 e 0
+ - Atribuindo significado aos estados on e off 
+ 
+ -esquemas de codificaçao:
+ 
+ - 1 e 0 são usados para armazenar dados
+ - 1 e 0 são usados para executar instruções
+ - 1 e 0 são usados para realizar cálculos
+ - 1 e 0 são usados para realizar operações de entrada e saída
+ - 1 e 0 são usados para realizar operações de armazenamento e recup
+ eração de dados
+ - 1 e 0 são usados para realizar operações de controle de fluxo
+ - 1 e 0 são usados para realizar operações de exceções
+ - 1 e 0 são usados para realizar operações de inicialização e configuração
+ - 1 e 0 são usados para realizar operações de finalização e encerramento
+ - O que é um bit?
+        O termo Bit, que é proveniente das palavras dígito binário, ou “BInary digiT”, é a menor unidade de medida de transmissão de dados usada na computação e informática. Um bit tem um único valor, zero ou um , verdadeiro ou falso, ou neste contexto quaisquer dois valores mutuamente exclusivos
+ - O que é um byte?
+ O byte é uma das menores unidades de memória usadas nos computadores e celulares modernos. O termo é usado principalmente como unidade de medida, para indicar a quantidade de armazenamento ou poder de processamento, por exemplo, mas também representa a unidade mais básica para representar um caractere.
+
+exemplo lampada
+
+1 lâmpada = 2 mensagens on ou off
+2 lâmpadas = 4 mensagens
+3 lâmpadas = 8 mensagens 
+4 lâmpadas = 16 mensagens 
+5 lâmpadas = 32 mensagens 
+6 lâmpadas = 64 mensagens 
+7 lâmpadas = 128 mensagens 
+8 lâmpadas = 256 mensagens 
+9 lâmpadas = 512 mensagens 
+10 lâmpadas = 1024 mensagens 
+11 lâmpadas = 2048 mensagens 
+ETC ......
+
+
+Quantificando bits
+
+1 bit
+
+8 bits - byte
+
+1000 bytes = kb
+
+1000 kb = mb
+
+1000 mb = gb
+
+1000 gb = tb
+
+link - https://go.dev/play/p/dA5V8Qs678-
+
+Primeiro pc criado - O ENIAC começou a ser desenvolvido em 1943 durante a II Guerra Mundial para computar trajetórias táticas que exigiam conhecimento substancial em matemática com mais agilidade, mas só se tornou operacional após o final da guerra.
+
+
+############ Tipos numéricos ###############
+
+
+- int vs. float : Números inteiros vs. números com frações
+- ref/spec > numeric types
+- Integers:
+    - Números inteiros 
+    - int & unit > "implementation-specific sizes"
+    - Todos os tipos numéricos são distintos, exceto:
+        - byte = uint8
+        - rune = int32 (utf8)
+    - Tipos são únicos 
+        - Go é uma linguagem estática 
+        -int e int32 não são a mesma coisa
+        - Para "misturá-los" é necessário converão 
+    - Regra geral: use somente int
+- Floating point:
+    - Números racionais ou reais
+    - Regra geral: use somente float64
+- Na prática                                    
+    - Defaults com := 
+    - Tipagem com var
+    - Dá pra colocar número com vínrgula em tipo int?
+    - Não é recomendado, pois pode causar problemas de precisão
+    - Overflow
+- "implementation-specific sizes"? Runtime package int?   - para ver in go - link - https://go.dev/play/p/MPv1W890Pof  // # meu linux 64 no caso 
+    - GOOS
+    - GORUNTIME
+    - https://play.golanf;org?p/1vp5DImIMM
+
+
+
+    Numeric types¶
+
+    An integer, floating-point, or complex type represents the set of integer, floating-point, or complex values, respectively. They are collectively called numeric types. The predeclared architecture-independent numeric types are:
+
+        uint8       the set of all unsigned  8-bit integers (0 to 255)
+        uint16      the set of all unsigned 16-bit integers (0 to 65535)
+        uint32      the set of all unsigned 32-bit integers (0 to 4294967295)
+        uint64      the set of all unsigned 64-bit integers (0 to 18446744073709551615)
+
+        int8        the set of all signed  8-bit integers (-128 to 127)
+        int16       the set of all signed 16-bit integers (-32768 to 32767)                                                           
+        int32       the set of all signed 32-bit integers (-2147483648 to 2147483647)
+        int64       the set of all signed 64-bit integers (-9223372036854775808 to 9223372036854775807)
+
+        float32     the set of all IEEE 754 32-bit floating-point numbers
+        float64     the set of all IEEE 754 64-bit floating-point numbers
+
+        complex64   the set of all complex numbers with float32 real and imaginary parts
+        complex128  the set of all complex numbers with float64 real and imaginary parts
+
+        byte        alias for uint8
+        rune        alias for int32
+
+
+
+    There is also a set of predeclared integer types with implementation-specific sizes:    
+
+     uint     either 32 or 64 bits
+     int      same size as uint
+     uintptr  an unsigned integer large enough to store the uninterpreted bits of a pointer value
+
+    
+############ Tipo string ###############   (cadeias de caracteres)
+
+- Strings são sequencias de bytes.
+- Imutáveis.
+- Uma string é um "slice of bytes." 
+- Na prática
+    - %v %T
+    - Raw string literals
+    - conversão para slice of bytes: [] byte(x)
+    -  %#U, %#x 
+    - Go playgraund - https://go.dev/play/p/tu2H3Ji0LKG - duas formas de ver os bytes das palavras codigo ASCII- um sub-set do utf8 que o Go usa.
+
+
+############ Sistemas numéricos  #############
+
+- Base-10: decimal, 0-9
+- Base-2: binário, 0-1
+- Base-16: hexadecimal, 0-f
+
+############ Constantes ###############
+
+- O tipo de uma constante so é definida durante o uso, pode ser usado como int ou float64, string.
+//- O tipo variavel é definida no momento da atribuição.
+- São valores imutáveis.
+- Podem ser tipadas ou não:
+    - const oi = "Bom dia"
+    - const oi string = "Bom dia"
+- As não tipadas só terão um tipo atribuido a elas quando forem usadas.
+    - Ex. qual o tipo de 42? int? unit? float64?
+    - Ou seja, é uma flexibilidade conveniente.
+- Na prática: int, float, string.
+    - const x = y
+    - const ( x = y )
+
+link - https://youtu.be/Yaw80pKukMc?si=Q_jw6tZhtp-iauCz - aula - 
+
+############ Iota ###############
+
+- Sucessivas constantes nao tipadas inteiras.
+- ref/spec#Iota
+- Numa declaração de constantes, o indentificador iota representa número sequenciais.
+-  Na prática.
+    - iota, iota + 1, a + iota b c, reinicia em cada const, _
+-https://play.golang.org/p/7MOnbhx4R4
+
+############ Deslocamento de bits ###############
+
+- Deslocamento de bits é quando deslocamos digitos binários para a esquerda ou direita.
+- Na prática:
+    - %d %be
+    - x << y
+    - iota * 10 << 10 = kb, mb, gb
+
+- https://splice.com/blog/iota-elegant-constants-golang/
+-https://play.golang.org/p/7MOnbhx4R4
+-https://medium.com/learning-the-go-programing-language/bit-hacking-with-go-e0acee258827
+
+-## 05 - Exercícios: lvl - 2
+
+## Na prática: exercícios #1
+
+- Escreva um programa que mostre um número em decimal, binário e hexadecimal.
+link - https://go.dev/play/p/bnegRda6Jot
+
+## Na prática: exercícios #2
+
+- Escreva expressões utilizando os seguintes operadores, e atribua seus valores a variáveis.
+- ==
+- !=
+- <=
+- <
+- >=
+- >
+link - https://go.dev/play/p/ZcApPZIyVXA
+
+## Na prática: exercícios #3
+
+- Crie constantes tipadas e não-tipadas
+- Demonstre seus valores.
+link - https://go.dev/play/p/bnzmF8lAlj0
+
+## Na prática: exercícios #4
+
+- Crie um programa que:
+ - Atribua um valor int a uma variavel
+ - Demonstre este valor em decimal , binário e hexadecimal
+ - Desloque os bits dessa variável 1 para a esquerda, e atribua o resultado e outra variável 
+ - Demonstre o valor da variável em decimal, binário e hexadecimal.
+link - https://go.dev/play/p/eO50dzvygTd
+
+ ## Na prática: exercícios #5
+
+ - Crie uma variável de tipo string utilizando uma raw string literal
+ - Demonstre-a.
+link - https://go.dev/play/p/tag9zvePQOo
+
+## Na prática: exercícios #6
+
+- Utilizando iota, crie 4 constantes cujos valores sejam os proximos 4 anos.
+- Demonstre estes valores.
+link - https://go.dev/play/p/EWVMeMiNurk
+
+## Na prática: exercícios #7
+
+- Prova - https://go.dev/play/p/EWVMeMiNurk 
+
+## Go é uma linguagem fortemente tipada, pois você não pode atribuir um valor de outro tipo à variável declarada.### 

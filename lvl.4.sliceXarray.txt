@@ -1,0 +1,153 @@
+//## diferença de slice para array - https://go.dev/play/p/qHfyvsPSdi6 
+//array especifica nos colchetes "[5]int", slice nao "[]int" 
+// slice e feito de arrays
+
+// ARRAY EU NAO CONSIGO MUDAR O VALOR DELE É FIXO,
+// SLICE EU CONSIGO MUDAR O VALOR DELE É DINAMIC- https://go.dev/play/p/tv4V3i9GRB5 - "append" 
+
+// mais exemplos usando slice, tirando índice, e valor tbm - https://go.dev/play/p/3iydilWO3cf - more exemple
+
+//Slice é parecido com array so que bem mais flexível é mais fácil de usar- Agrupamentos de dados slice: literal composta.
+// slice vc vai usar toda hr, array uma vez ou outra.
+// slice é um tipo de dado composto.
+
+
+// slice: fatiando ou deletando uma fatia - https://go.dev/play/p/iMXDWIfjJ9t
+
+// como percorrer os itens dentro de uma slice sem usar o range -https://go.dev/play/p/-WL-fL2OwxC
+
+// aula youtube - https://www.youtube.com/watch?v=G0rxcnojV_U&list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg&index=62
+
+
+// deletando um item do slice -  https://go.dev/play/p/cXpzaQq0
+
+// pode-se unir slices de mesmo tipo - (...) un·furl - 
+
+
+
+
+// slece : MAKE - 
+
+- Slices são feitas de arrays
+- Elas são dinâmicas, podem mudar de tamanho.
+- Sempre que isso acontece, um novo array é criado e os dados são copiados.
+- É conveniente, mas tem um custo computacional.
+- Para otimizar as coisas, podemos utilizar make.
+- make ([]T, len, cap) // len se refere mais ao slice, // o cap se refere mais ao array
+- https://go.dev/play/p/R35KgqLNOJv
+
+
+// slice multi-di mencional - parecido com planilha excel, um dentro do outro.
+
+
+
+
+// agrupamento de dados 8 - slice a surpresa do array adjacente - https://go.dev/play/p/ERNN8RjkR33
+
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Maps: range & deletando
+// MAPS -  introdução
+// são estruturas de dados do tipo chaves/valor
+//exemplo: lista telefonica- nome+numero
+//a diferença e que mapas nao sao ordenados, se fizer um range() que fizemos nos slices, nos mapas o valores serão aleatório,ordem aleatória//
+//porém tem a performance extremamente boa  -
+
+ maps: range & deletando - Range: for k, v := range map { }
+Reiterando: maps não tem ordem e um range usará uma ordem aleatória.
+Go Playground: https://play.golang.org/p/6zEMfIP-AE
+delete(map, key)
+Deletar uma key não-existente não retorna erros!
+Go Playground: https://play.golang.org/p/0uuIicU3Zz 
+
+llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+
+ex 1 : usando um literal composta: 
+    - Crie um array que suporte 5 valores do tipo int
+    - Atribua valores aos seus índices
+-Utilize range e demonstre os valores do array.
+-Utilizando o format printing, demonstre o tipo do array.
+- solução: - https://go.dev/play/p/oiq6Ps_r7Qa
+
+llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+
+ex 2: usando um literal composta:
+- Crie um slice que suporte [10] valores do tipo string
+- Utilize range e demonstre os valores do array.
+- Utilizando o format printing, demonstre o tipo do array.
+- solução: https://go.dev/play/p/_hFYkDQeWik
+
+llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
+
+ex 3: Utilizando como base o exercício anterior, utilize slicing para demonstrar os valores:
+    - Do primeiro ao terceiro item do slice ( incluindo o terceiro item!)
+    - Do quinto ao último item do slice (incluindo o ultimo item!)
+    - Do segundo ao sétimo item do slice (incluindo o sétimo item!)
+    - Do terceiro ao penúltimo item do slice (incluindo o penúltimo item!)
+    solução - https://go.dev/play/p/wmC5vi5MR7o
+
+    - Desafios: otenha o mesmo resultado acima utilizando a função len() para determinar o penúltimo item- 
+    solução: - https://go.dev/play/p/maWotH4A0-d
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ex 4: Começando com a seguinte slice:
+    - x := []int{42, 43, 44, 45, 46, 47, 48, 49, 50, 51}
+    - Anexe a ela o valor 52;
+    - Anexe a ela o valor 53, 54, e 55;
+    -anexe a ela a seguinte slice:
+        - Utilizando a única  declaração;
+        - Demonstre a slice;
+        - Anexe a ela a seguinte slice:
+            -y := []int{56, 57, 58, 59, 60}
+        - Demonstre a slice x.
+        - Solução: -  https://go.dev/play/p/C9SC9M2v33X
+   
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ex 5: Comece com essa slice:
+ -x:=[]int{42, 43, 44, 45, 46, 47, 48, 49, 50, 51}
+- Utilizando slicing e append, crie uma slice y que contenha os valores:
+ - [42, 43, 44, 48, 49, 50, 51]
+ - solução -  https://go.dev/play/p/50qu2fstCOH
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ex 6: Crie uma slice usando make que possa conter todos os estados do Brasil.
+- oS ESTADOS: "Acre", "Alagoas", "Amapá","Amazônas", "Bahia", "Ceará", "Espírito Santo",
+"Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
+"Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Sul", "Rondônia", "Roraima",
+"Santa Cantarina", "São Paulo", "Sergipe", "Tocantins",
+- Demonstre o len e cap da slice.
+- Demonstre todos os valores da slice 
+*sem utlizar o range* // se vc nao utiliza o range vc faz um loop ++ ate percorrer todo o slice
+- Solução - https://go.dev/play/p/VdSdQbM6Qgp 
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ex 7: Crie uma slice contendo slices de strings ([][]string). Atribua valores a este slice multi-dimensional da seguinte maneira:
+        -"Nome", "Sobrenome", "Hobby favorito"
+    - Inclua dados para 3 pessoas, e utilize range para demonstrar estes dados.
+    - Solução - https://go.dev/play/p/8Cx5Ww3x-aq
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ex 8: Crie uma map com key tipo string e value tipo []string.
+    - Key deve conter nomes no formato sobrenome_nome
+    - Valor deve conter os hobbies favorito das pessoas 
+    - Demonstre todos esses valores e seus índices.
+    - solução - https://go.dev/play/p/dRL_sIoqGSb
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ex 9: utilizando o exercício anterior, adicione uma entrada ao map e demonstre o map inteiro
+utilizando range.
+- solução - https://go.dev/play/p/egvfHIRYlzX
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ex 10: Utilizando o exercicio anterior, remova uma entrada do map e demonstre o map inteiro utilizando range.
+- solução - https://go.dev/play/p/HkGQ_uhuT_I

@@ -1,0 +1,161 @@
+
+Ponteiros
+
+//aula ponteiros em c: https://www.youtube.com/watch?v=MYoW35lGxvA
+
+Todos os valores ficam armazenados na memória.
+Toda localização na memória possui um endereço.
+Um pointeiro se refere a esse endereço.
+Notações:
+&variável mostra o endereço de uma variável
+%T: variável vs. &variável
+*variável faz de-reference, mostra o valor que consta nesse endereço
+????: *&var funciona!
+*type é um tipo que contem o endereço de um valor do tipo type, nesse caso * não é um operador
+Exemplo: a := 0; b := &a; *b++
+Go Playground: https://play.golang.org/p/gC1qGFUYrV
+
+Em Go (também conhecido como Golang), ponteiros são variáveis que armazenam o endereço de memória de outra variável. Eles permitem que você acesse e manipule indiretamente o valor da variável apontada.
+
+Declaração de Ponteiros
+Para declarar um ponteiro em Go, você usa o operador * seguido do tipo de dado para o qual o ponteiro aponta. Por exemplo:
+
+
+var p *int
+Aqui, p é um ponteiro para um valor do tipo int.
+
+Inicialização de Ponteiros
+Para inicializar um ponteiro, você pode usar o operador &, que retorna o endereço de memória de uma variável:
+
+
+var x int = 42
+p := &x
+Neste exemplo, p agora contém o endereço de memória da variável x.
+
+Acessando o Valor Apontado
+Para acessar o valor armazenado no endereço de memória apontado pelo ponteiro, você usa o operador * novamente:
+
+
+fmt.Println(*p) // Imprime o valor de x, que é 42
+Modificando o Valor Apontado
+Você pode modificar o valor da variável original através do ponteiro:
+
+
+*p = 100
+fmt.Println(x) // Imprime 100, pois o valor de x foi alterado através do ponteiro p
+Ponteiros e Funções
+Ponteiros são frequentemente usados em funções para permitir que a função modifique o valor da variável original passada como argumento:
+
+
+func increment(p *int) {
+    *p = *p + 1
+}
+
+func main() {
+    x := 10
+    increment(&x)
+    fmt.Println(x) // Imprime 11
+}
+Ponteiros e Estruturas
+Ponteiros também são comuns ao trabalhar com estruturas (structs), especialmente quando você quer evitar a cópia de grandes estruturas ou modificar a estrutura original:
+
+
+type Person struct {
+    Name string
+    Age  int
+}
+
+func birthday(p *Person) {
+    p.Age++
+}
+
+func main() {
+    person := Person{Name: "Alice", Age: 30}
+    birthday(&person)
+    fmt.Println(person.Age) // Imprime 31
+}
+Ponteiro Nulo (nil)
+Um ponteiro que não aponta para nenhum endereço de memória válido tem o valor nil. Isso é útil para verificar se um ponteiro foi inicializado:
+
+
+var p *int
+if p == nil {
+    fmt.Println("p é nil")
+}
+Resumo
+Ponteiros armazenam endereços de memória.
+
+*T é o tipo de um ponteiro para um valor do tipo T.
+
+& retorna o endereço de uma variável.
+
+* acessa o valor armazenado no endereço apontado pelo ponteiro.
+
+nil é o valor zero para ponteiros, indicando que eles não apontam para nenhum endereço válido.
+
+Ponteiros são uma ferramenta poderosa em Go, mas devem ser usados com cuidado para evitar erros comuns, como dereferenciar um ponteiro nil.
+
+posso fazer operaçoes na endereço desta memória
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx parte a parte:
+
+
+Ponteiros – 2. Quando usar ponteiros
+
+- https://go.dev/play/p/VI2FohqKMgi
+
+posso fazer operaçoes na endereço desta memória
+
+Em Go, os argumentos de funções são passados por valor, o que significa que uma cópia do valor é passada para a função.
+  Se você quiser modificar o valor original da variável, deve passar um ponteiro para essa variável.
+  EX - func incrementar(x *int) {
+    *x = *x + 1  // X++
+}
+
+func main() {
+    x := 10
+    incrementar(&x)
+    fmt.Println(x) // Saída: 11
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Ponteiros permitem compartilhar endereços de memória. Isso é útil quando:
+Não queremos passar grandes volumes de dados pra lá e pra cá
+Queremos mudar um valor em sua localização original (tudo em Go é pass by value!)
+Exemplos:
+x := 0; funçãoquemudaovalordoargumentopra1(x); Print(x)
+x := 0; funçãoquemudaovalordo*argumentopra1(&x); Print(x)
+Go Playground: https://play.golang.org/p/VZmfWfw76s
+
+/////////////////////////////////////////////////////////////////////////////////
+2. Evitar cópia de grandes estruturas de dados
+Se você tem uma estrutura de dados grande (como um struct com muitos campos), passar um ponteiro para essa estrutura é mais eficiente 
+do que passar uma cópia dela, pois evita a duplicação de dados na memória.
+
+
+type Pessoa struct {
+    Nome  string
+    Idade int
+}
+
+func alterarNome(p *Pessoa, novoNome string) {
+    p.Nome = novoNome
+}
+
+func main() {
+    p := Pessoa{Nome: "João", Idade: 30}
+    alterarNome(&p, "José")
+    fmt.Println(p.Nome) // Saída: José
+}
+
+////////////////////////////////////////////////////////////////
+
+Crie um valor e atribua-o a uma variável.
+Demonstre o endereço deste valor na memória.
+Solução: https://go.dev/play/p/OJ-qK1WXuxG
+
+
+
