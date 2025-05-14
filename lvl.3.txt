@@ -67,7 +67,7 @@ link - https://go.dev/play/p/-tcsHbK9ofu
 - ref/soec#For_statements, effective go
 - (Range vem mais pra frente.)
 
-link - https://go.dev/play/p/yVK-clFL3gs
+link - https://go.dev/play/p/nBX11XLWQbI
 
 Loops: a declaração for
 
@@ -89,7 +89,7 @@ Fluxo de Controle – 6. Loops: utilizando ascii
 - Linha nova \n
 - Faça um loop dos números 33 a 122, e utilize format printing para demonstrá-los como texto/string.
 
-link - https://go.dev/play/p/Y-1Okfrpeqa
+link - https://go.dev/play/p/Y-'1Okfrpeqa
 
 Fluxo de Controle – 7. Condicionais: a declaração if
 

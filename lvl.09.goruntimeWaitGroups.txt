@@ -596,3 +596,324 @@ Conclusão
 As operações atômicas fornecidas pelo pacote sync/atomic são uma ferramenta poderosa para manipular variáveis de forma segura em um ambiente concorrente,
  sem a necessidade de mutexes. Elas são especialmente úteis para operações simples como incremento,
  decremento e comparação e troca, garantindo eficiência e segurança.
+
+ //////////////////////////////////////////////////////////////////////////////////////////
+
+
+ EXERCÍCIOS
+
+ -Além da goroutine principal, crie duas outras goroutines.
+ -Cada goroutine adicional devem fazer um print separado.
+ -Utilize waitgroups para fazer com que suas gorountines finalizes antes de o programa terminar.
+
+ - solução: no go playground - https://go.dev/play/p/a7AGP4OG_FF
+
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func main() {
+	// Inicializa um WaitGroup para sincronizar as goroutines
+	var wg sync.WaitGroup
+
+	// Adiciona 2 ao WaitGroup, uma para cada goroutine adicional
+	wg.Add(2)
+
+	// Cria a primeira goroutine adicional
+	go func() {
+		defer wg.Done() // Indica que a goroutine terminou
+		fmt.Println("Goroutine 1: Iniciando...")
+		time.Sleep(1 * time.Second) // Simula uma tarefa que leva tempo
+		fmt.Println("Goroutine 1: Terminando...")
+	}()
+
+	// Cria a segunda goroutine adicional
+	go func() {
+		defer wg.Done() // Indica que a goroutine terminou
+		fmt.Println("Goroutine 2: Iniciando...")
+		time.Sleep(1 * time.Second) // Simula uma tarefa que leva tempo
+		fmt.Println("Goroutine 2: Terminando...")
+	}()
+
+	// Aguarda até que todas as goroutines adicionais terminem
+	wg.Wait()
+
+	// Apenas a goroutine principal imprime esta mensagem
+	fmt.Println("Programa principal: Todas as goroutines terminaram.")
+}
+
+
+Explicação do Código
+Inicialização do WaitGroup:
+var wg sync.WaitGroup cria um sync.WaitGroup para sincronizar as goroutines.
+Adicionar Goroutines ao WaitGroup:
+wg.Add(2) adiciona duas goroutines ao WaitGroup. Isso indica que o programa principal deve esperar por duas goroutines antes de continuar.
+Criação das Goroutines:
+As duas goroutines adicionais são criadas usando go func() {}.
+Dentro de cada goroutine, defer wg.Done() é usado para indicar que a goroutine terminou sua execução. Isso é importante para que o WaitGroup saiba que a goroutine concluiu sua tarefa.
+Simulação de Tarefa:
+time.Sleep(1 * time.Second) é usado para simular uma tarefa que leva algum tempo para ser concluída.
+Aguardar o Término das Goroutines:
+wg.Wait() faz com que a goroutine principal espere até que todas as goroutines adicionais terminem.
+Mensagem Final:
+Após todas as goroutines adicionais terminarem, a goroutine principal imprime uma mensagem indicando que todas as goroutines terminaram
+
+
+
+TBM A OUTRA MANEIRA DE FAZER USANDO LAÇO DE REPETIÇÃO FOR feito de uma maneira modular para escolher quantas goroutines usar
+
+package main 
+
+import ("fmt"
+		"sync"
+)
+
+var wg sync.WaitGroup
+
+func main() {
+	novasgoroutines(100)
+	wg.Wait()
+}
+
+func novasgoroutines (i int) {
+	wg.Add(i)
+	for j := 0; j < i; j++ {
+		x := j
+		go func(i int){
+			fmt.Println("Eu sou goroutine 1:" i)
+			wg.Done()
+		}(x)
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+ex 2 - Esse exercício vai reforçar seus conhecimentos sobre conjuntos de métodos.
+
+-Crie um tipo para um struct chamado "pessoa"
+-Crie um método "falar" para este tipo que tenha um receiver ponteiro (*pessoa)
+-Crie uma interface, "humanos", que seja implementada por tipos com o método "falar"
+-Crie uma função "dizerAlgumaCoisa" cujo parâmetro seja do tipo "humanos" e que chame o método "falar"
+
+Demonstre no seu código:
+
+-Que você pode utilizar um valor do tipo "*pessoa" na função "dizerAlgumaCoisa"
+-Que você não pode utilizar um valor do tipo "pessoa" na função "dizerAlgumaCoisa"
+
+#Se precisar de dicas, veja: https://gobyexample.com/interfaces
+#Solução: https://github.com/ellenkorbes/aprend...
+
+solução:
+
+Vamos criar um tipo pessoa, um método falar para esse tipo, uma interface humanos, e uma função dizerAlgumaCoisa que
+ aceita um parâmetro do tipo humanos. Além disso, demonstraremos que um valor do tipo *pessoa pode ser usado na função dizerAlgumaCoisa,
+  mas um valor do tipo pessoa não pode.
+
+
+package main
+
+import "fmt"
+
+// Definindo o tipo pessoa
+type pessoa struct {
+	nome string
+}
+
+// Definindo o método falar com receiver ponteiro (*pessoa)
+func (p *pessoa) falar() {
+	fmt.Printf("Olá, meu nome é %s\n", p.nome)
+}
+
+// Definindo a interface humanos
+type humanos interface {
+	falar()
+}
+
+// Definindo a função dizerAlgumaCoisa que aceita um parâmetro do tipo humanos
+func dizerAlgumaCoisa(h humanos) {
+	h.falar()
+}
+
+func main() {
+	// Criando uma pessoa
+	p1 := pessoa{nome: "João"}
+
+	// Utilizando um valor do tipo *pessoa na função dizerAlgumaCoisa
+	dizerAlgumaCoisa(&p1) // Funciona porque &p1 é do tipo *pessoa, que implementa humanos
+
+	// Tentando utilizar um valor do tipo pessoa na função dizerAlgumaCoisa
+	// dizerAlgumaCoisa(p1) // Isso causará um erro de compilação porque p1 é do tipo pessoa, não *pessoa
+}
+Explicação do Código
+Definindo o Tipo pessoa:
+
+type pessoa struct {
+    nome string
+}
+Criamos um tipo pessoa que é um struct com um campo nome.
+Definindo o Método falar:
+
+
+func (p *pessoa) falar() {
+    fmt.Printf("Olá, meu nome é %s\n", p.nome)
+}
+Definimos um método falar para o tipo pessoa com um receiver ponteiro (*pessoa). Isso permite que o método modifique o estado da struct se necessário.
+Definindo a Interface humanos:
+
+type humanos interface {
+    falar()
+}
+Definimos uma interface humanos que requer que qualquer tipo que a implemente tenha um método falar().
+Definindo a Função dizerAlgumaCoisa:
+
+func dizerAlgumaCoisa(h humanos) {
+    h.falar()
+}
+
+Definimos uma função dizerAlgumaCoisa que aceita um parâmetro do tipo humanos e chama o método falar desse parâmetro.
+
+Demonstração:
+
+Criamos uma instância de pessoa chamada p1.
+Chamamos dizerAlgumaCoisa(&p1), passando um ponteiro para p1. Isso funciona porque *pessoa implementa a interface humanos.
+Comentamos a linha dizerAlgumaCoisa(p1) para evitar um erro de compilação. Se descomentada, causará um erro porque p1 é do tipo pessoa, que não implementa a interface humanos.
+
+Saída do Programa
+
+A saída do programa será:
+
+Olá, meu nome é João
+
+Isso demonstra que a função dizerAlgumaCoisa pode aceitar um valor do tipo *pessoa, mas não um valor do tipo pessoa.
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ex 3 - Utilizando goroutines, crie um programa incrementador:
+
+Tenha uma variável com o valor da contagem
+
+Crie um monte de goroutines, onde cada uma deve:
+
+Ler o valor do contador
+Salvar este valor
+
+Fazer yield da thread com runtime.Gosched()
+
+Incrementar o valor salvo
+
+Copiar o novo valor para a variável inicial
+
+Utilize WaitGroups para que seu programa não finalize antes de suas goroutines.
+
+Demonstre que há uma condição de corrida utilizando a flag -race
+
+Solução: https://github.com/ellenkorbes/aprend...
+
+resolução 1 :
+
+Vamos criar um programa em Go que demonstra uma condição de corrida (race condition) ao incrementar um contador usando goroutines. Para isso, usaremos sync.WaitGroup para garantir que todas as goroutines terminem antes de o programa principal finalizar. Além disso, usaremos a flag -race para detectar a condição de corrida.
+Código Completo
+go
+Copy
+package main
+
+import (
+	"fmt"
+	"sync"
+	"runtime"
+)
+
+func main() {
+	// Variável compartilhada para o contador
+	var counter int
+	var wg sync.WaitGroup
+
+	// Número de goroutines
+	numGoroutines := 1000
+
+	// Adiciona as goroutines ao WaitGroup
+	wg.Add(numGoroutines)
+
+	// Cria e inicia as goroutines
+	for i := 0; i < numGoroutines; i++ {
+		go func() {
+			defer wg.Done() // Indica que a goroutine terminou
+
+			// Lê o valor do contador
+			val := counter
+
+			// Faz yield da thread
+			runtime.Gosched()
+
+			// Incrementa o valor salvo
+			val++
+
+			// Copia o novo valor para a variável inicial
+			counter = val
+		}()
+	}
+
+	// Aguarda todas as goroutines terminarem
+	wg.Wait()
+
+	// Imprime o valor final do contador
+	fmt.Printf("Valor final do contador: %d\n", counter)
+}
+Explicação do Código
+
+Variável Compartilhada:
+
+var counter int é a variável compartilhada que todas as goroutines lerão e modificarão.
+
+WaitGroup:
+
+var wg sync.WaitGroup é usado para sincronizar as goroutines.
+wg.Add(numGoroutines) adiciona todas as goroutines ao WaitGroup.
+
+Criação das Goroutines:
+
+Usamos um loop para criar e iniciar numGoroutines goroutines.
+Cada goroutine lê o valor atual do contador, faz um runtime.Gosched() para simular uma interrupção, incrementa o valor lido e, em seguida, atualiza a variável compartilhada.
+
+Fazendo Yield da Thread:
+runtime.Gosched() é chamado para ceder a execução para outras goroutines, o que aumenta a probabilidade de uma condição de corrida.
+
+Sincronização das Goroutines:
+defer wg.Done() é usado para indicar que a goroutine terminou.
+wg.Wait() faz com que a goroutine principal espere até que todas as goroutines adicionais terminem.
+
+Imprimindo o Valor Final:
+
+Após todas as goroutines terminarem, imprimimos o valor final do contador.
+Demonstrando a Condição de Corrida
+
+Para demonstrar a condição de corrida, compile e execute o programa com a flag -race:
+
+go run -race main.go
+A flag -race habilita o detector de condições de corrida do Go, que monitora o acesso concorrente a variáveis e alerta se detectar uma condição de corrida.
+
+Saída do Programa
+Sem a flag -race, a saída pode ser algo como:
+
+Valor final do contador: 997
+
+Com a flag -race, a saída pode incluir mensagens de condição de corrida, como:
+
+==================
+WARNING: DATA RACE
+Write at 0x00c000018018 by goroutine 6:
+  main.main.func1()
+      /path/to/your/main.go:24 +0x65
+
+Previous write at 0x00c000018018 by goroutine 5:
+  main.main.func1()
+      /path/to/your/main.go:24 +0x65
+
+...
+Isso demonstra que há uma condição de corrida, pois várias goroutines estão tentando ler e modificar a variável compartilhada counter ao mesmo tempo, sem sincronização adequada.

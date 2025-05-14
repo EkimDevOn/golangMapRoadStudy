@@ -150,3 +150,94 @@ git remote
 git remote get-url origin
 git remote blablabla ← help
 Truque sujo: apaga tudo e clona denovo. (Não recomendo se o repo tiver 4 GB...)
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+Ambiente de Desenvolvimento – 7. Compilação cruzada
+
+GOOS // sistema operacional
+GOARCH // arquitetura do porcessador
+`GOOS=darwin GOARCH=amd64 go build test.go`
+https://godoc.org/runtime#pkg-constants
+git push
+git clone
+go get
+Arquivos: https://github.com/ellenkorbes/aprend...
+
+Mais detalhado:
+
+A compilação cruzada em Golang é um processo que permite compilar um programa Go para uma plataforma diferente daquela em que você está desenvolvendo.
+ Isso é especialmente útil para criar software que pode ser executado em diferentes sistemas operacionais sem precisar de um compilador Go instalado em cada um deles.
+
+Como Funciona
+A partir da versão 1.5 do Go, a compilação cruzada tornou-se muito mais simples.
+ Você pode especificar o sistema operacional e a arquitetura alvo usando as variáveis de ambiente GOOS e GOARCH
+  antes de compilar seu programa. Por exemplo:
+
+Para compilar um programa para Windows a partir de um sistema Linux ou macOS:
+
+bash
+GOOS=windows GOARCH=amd64 go build -o hello.exe hello.go
+
+Para compilar para Linux a partir de Windows:
+
+bash
+set GOOS=linux
+set GOARCH=amd64
+go build -o hello hello.go
+
+Para compilar para macOS a partir de Linux ou Windows:
+
+bash
+GOOS=darwin GOARCH=amd64 go build -o hello
+
+Verificando Plataformas Suportadas
+Você pode verificar todas as combinações de GOOS e GOARCH suportadas pelo seu Go instalado usando o comando:
+
+bash
+go tool dist list
+
+Isso fornecerá uma lista de todas as plataformas que sua versão do Go pode alvo.
+Compilação Cruzada com CGO
+Se seu projeto usa CGO (o mecanismo de interoperabilidade entre Go e C), as coisas podem ficar um pouco mais complicadas.
+ CGO requer um compilador C, e compilar C para uma plataforma cruzada não é trivial. Você pode precisar instalar um compilador
+  C cruzado, como gcc ou clang, e configurar variáveis de ambiente adicionais como CC e CGO_ENABLED=1. Por exemplo:
+
+bash
+CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -o hello.exe hello.go
+
+Ferramentas de Compilação Cruzada
+Existem ferramentas que podem facilitar a compilação cruzada, como o gox. 
+O gox é uma ferramenta simples para compilação cruzada em Go que se comporta muito como o go build padrão,
+ mas permite compilar para várias plataformas de forma paralela. Por exemplo:
+
+bash
+gox -osarch="linux/amd64" -osarch="windows/amd64" -osarch="darwin/amd64"
+
+
+Conclusão
+A compilação cruzada em Go é uma funcionalidade poderosa que permite aos desenvolvedores criar binários para várias plataformas
+ a partir de uma única máquina de desenvolvimento. Isso facilita a distribuição de ferramentas e aplicativos
+  para diferentes sistemas operacionais, tornando o desenvolvimento mais eficiente e versátil.
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   Ambiente de Desenvolvimento – 8. Pacotes
+
+   Opção 1: uma pasta, vários arquivos.
+package declaration em todos os arquivos
+package scope: um elemento de um arquivo é acessível de todos os arquivos
+imports tem file scope
+Opção 2: separando por packages.
+pastas diferentes
+requer imports
+para usar: package.Função()
+Exportado vs. não-exportado, ou seja, visível vs. não-visível
+Em Go não utilizamos os termos "público" e "privado" como em outras linguagens
+É somente questão de capitalização
+Com maiúscula: exportado, visível fora do package
+Com minúscula: não exportado, não utilizável fora do package
+Artigo: https://rakyll.org/style-packages/
+Exemplo: https://github.com/ellenkorbes/aprend...
+
+//////////////////////////////////////////////////////////////

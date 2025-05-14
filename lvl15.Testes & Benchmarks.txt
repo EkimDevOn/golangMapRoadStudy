@@ -1,0 +1,80 @@
+
+
+Testes devem:
+ficar num arquivo cuja terminação seja _test.go
+ficar na mesma package que o código a ser testado
+ficar em funções com nome "func TestNome(*testing.T)"
+Para rodar os testes:
+go test
+go test -v
+Para falhas, utilizamos t.Error(), onde a maneira idiomática é algo do tipo "expected: x. got: y."
+
+aula link - https://youtu.be/JjzjvbFAv2A?list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+2. Testes em tabela
+
+Podemos escrever testes em série para testar variedades de situações.
+Exemplo:
+struct test, fields: data []int, answer int
+tests := []test{[]int{}, int}
+range tests
+
+aula - https://youtu.be/uTH_OAxaIiI?list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Testes – 3. Testes como exemplos
+
+Outra maneira é fazer testes como exemplos.
+Estes exemplos são os mesmos que aparecem na documentação.
+Para exemplos o formato é "func ExampleFuncao()" // mais facil de escrever sem necessidade de if ou for
+Deve haver um comentário "// Output: resultado", que é o que será testado
+Para visualizar seu exemplo na documentação, fazemos o de sempre:
+godoc -http :8080
+
+aula - https://youtu.be/a3_dz_xpmQ0?list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Testes – 4. go fmt, govet e golint
+
+gofmt: formata o código
+go vet: correctness → procura constructs suspeitos // procura erros
+golint: suggestions → procura coding style ruim // da sugestões de melhoria de código
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Testes & Benchmarks – 5. Benchmarks - medidas de performance (qual código funciona melhor)
+
+Benchmarks nos permitem testar a velocidade ou performance do nosso código.
+Na prática:
+Arquivo: _test.go
+BET: Testes, Exemplos e Benchmark
+func BenchmarkFunc (b *testing.B) { for i := < b.N; i++ { ... } }
+go test -bench . ← todos
+go test -bench Func ← somente Func
+
+go help testflag // mostra mais teste bench de memoria, quando processadores usar e outros opçoes de testes tbm
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Testes & Benchmarks – 6. Cobertura
+
+(70 a 80% ok)
+
+"Cobertura" em se tratando de testes se refere a quanto do seu código, percentualmente, está sendo testado. (E antes que alguem fique neurótico querendo 100%: em geral, 70-80% tá ótimo.)
+A flag -cover faz a análise de cobertura do nosso código.
+Podemos utilizar a flag -coverprofile [arquivo] para salvar a análise de cobertura em um arquivo.
+Na prática:
+go test -cover
+go test -coverprofile c.out
+go tool cover -html=c.out ← abre no browser
+go tool cover -h ← para mais detalhes
+
+link = https://youtu.be/P6I3hzpSaA4?list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg

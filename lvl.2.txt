@@ -258,4 +258,5 @@ link - https://go.dev/play/p/EWVMeMiNurk
 
 - Prova - https://go.dev/play/p/EWVMeMiNurk 
 
-## Go é uma linguagem fortemente tipada, pois você não pode atribuir um valor de outro tipo à variável declarada.### 
+## Go é uma linguagem fortemente tipada, pois você não pode atribuir um valor de outro tipo à variável declarada.###
+

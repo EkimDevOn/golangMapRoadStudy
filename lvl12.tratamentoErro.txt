@@ -1,0 +1,803 @@
+ Tratar erros é uma parte fundamental da programação em Go. Go adota uma abordagem explícita e direta para lidar com erros, o que torna o código mais legível e robusto. Vamos entender como funciona e como podemos tratar erros de maneira eficaz.
+Como erros funcionam em Go
+Em Go, os erros são representados pelo tipo error, que é uma interface. Qualquer tipo que implemente o método Error() string pode ser considerado um erro. Por exemplo:
+
+
+type error interface {
+    Error() string
+}
+Retorno de erros em funções
+Funções em Go podem retornar múltiplos valores, incluindo um valor de erro. É comum que funções retornem um valor principal e um erro. Por exemplo:
+
+
+func dividir(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("divisão por zero")
+    }
+    return a / b, nil
+}
+Neste exemplo, a função dividir retorna um valor do tipo float64 e um erro. Se b for zero, ela retorna um erro usando fmt.Errorf.
+Tratando erros
+Quando chamamos uma função que pode retornar um erro, é importante verificar se o erro ocorreu. Isso é feito usando uma atribuição múltipla e uma verificação condicional. Por exemplo:
+
+
+resultado, err := dividir(10, 0)
+if err != nil {
+    fmt.Println("Ocorreu um erro:", err)
+} else {
+    fmt.Println("Resultado:", resultado)
+}
+Neste exemplo, se err não for nil, significa que ocorreu um erro e podemos tratá-lo de acordo.
+Propagando erros
+Se uma função chama outra função que pode retornar um erro, é importante propagar esse erro para cima na pilha de chamadas. Isso é feito simplesmente retornando o erro recebido. Por exemplo:
+
+
+func calcular(a, b float64) (float64, error) {
+    resultado, err := dividir(a, b)
+    if err != nil {
+        return 0, err
+    }
+    return resultado, nil
+}
+Criando erros personalizados
+Em alguns casos, pode ser útil criar erros personalizados para representar situações específicas. Podemos criar uma estrutura que implemente a interface error. Por exemplo:
+
+
+type ErroDivisaoPorZero struct{}
+
+func (e ErroDivisaoPorZero) Error() string {
+    return "divisão por zero"
+}
+
+func dividir(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, ErroDivisaoPorZero{}
+    }
+    return a / b, nil
+}
+Neste exemplo, ErroDivisaoPorZero é um tipo personalizado que implementa a interface error.
+Verificando tipos de erros
+Se você está usando erros personalizados ou precisa verificar tipos específicos de erros, pode usar a afirmação de tipo (type assertion). Por exemplo:
+
+
+resultado, err := dividir(10, 0)
+if err != nil {
+    if _, ok := err.(ErroDivisaoPorZero); ok {
+        fmt.Println("Erro específico: divisão por zero")
+    } else {
+        fmt.Println("Ocorreu um erro:", err)
+    }
+}
+Melhores práticas para tratamento de erros
+Sempre verificar erros: Quando uma função retorna um erro, sempre verifique-o.
+Propague erros: Não ignore erros. Se você não pode tratá-los, propague-os para cima na pilha de chamadas.
+Use erros personalizados: Para situações específicas, use erros personalizados para tornar o código mais legível e fácil de manter.
+Evite panics: Use panic apenas para situações catastróficas. Para erros normais, use o mecanismo de erros padrão.
+Exemplo completo
+Vamos criar um exemplo completo que demonstra esses conceitos:
+
+
+package main
+
+import (
+    "errors"
+    "fmt"
+)
+
+type ErroDivisaoPorZero struct{}
+
+func (e ErroDivisaoPorZero) Error() string {
+    return "divisão por zero"
+}
+
+func dividir(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, ErroDivisaoPorZero{}
+    }
+    return a / b, nil
+}
+
+func calcular(a, b float64) (float64, error) {
+    resultado, err := dividir(a, b)
+    if err != nil {
+        return 0, err
+    }
+    return resultado, nil
+}
+
+-------------------------------------------------------------
+-------------------------------------------------------------
+-------------------------------------------------------------
+
+type error interface {
+    Error() string
+}
+
+xxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Para quem já programa em outras linguagens:
+Em Go não temos exceções. → https://golang.org/doc/faq#exceptions
+"We believe that coupling exceptions to a control structure, as in the try-catch-finally idiom, results in convoluted code."
+"Go's multi-value returns make it easy to report an error without overloading the return value. A canonical error type, coupled with Go's other features, makes error handling pleasant but quite different from that in other languages."
+Aventureiros: https://blog.golang.org/error-handlin...
+É interessante criar o hábito de lidar com erros imediatamente, similar a e.g. defer close.
+package builtin, type error interface
+package errors
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+
+
+                                  Tratamento de Erros – 2. Verificando erros
+
+
+    ALGUNS EXEMPLOS SIMPLES ABAIXO :
+
+    Verifique seus erros!
+    (Exceção: fmt.Println)
+
+    Na prática:
+
+     EXEÇÃO -   Exemplo 0: fmt.Println -   https://go.dev/play/p/6DXMAbqvaGr
+
+
+
+        Exemplo 1: fmt.Scan(&var) -   https://go.dev/play/p/2LjGeDNMfmB
+
+        Exemplo 2: os.Create → strings.NewReader → io.Copy -  https://go.dev/play/p/ikmA9IyY-xM
+
+        Exemplo 3: os.Open → io.ReadAll -   https://go.dev/play/p/zdIKVwvU8oa
+
+
+
+
+Em Go, você pode verificar o tipo de erro usando a afirmação de tipo (type assertion) ou a função errors.Is (a partir do Go 1.13). Vou explicar ambas as abordagens com exemplos.
+1. Usando afirmação de tipo (type assertion)
+Se você tem um erro personalizado ou precisa verificar se um erro é de um tipo específico, pode usar a afirmação de tipo. Isso é útil quando você define seus próprios tipos de erro.
+Exemplo com afirmação de tipo:
+
+
+package main
+
+import (
+	"fmt"
+)
+
+// Definindo um erro personalizado
+type ErroDivisaoPorZero struct{}
+
+func (e ErroDivisaoPorZero) Error() string {
+	return "divisão por zero"
+}
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, ErroDivisaoPorZero{}
+	}
+	return a / b, nil
+}
+
+func main() {
+	_, err := dividir(10, 0)
+	if err != nil {
+		// Verificando se o erro é do tipo ErroDivisaoPorZero
+		if _, ok := err.(ErroDivisaoPorZero); ok {
+			fmt.Println("Erro específico: divisão por zero")
+		} else {
+			fmt.Println("Ocorreu um erro não específico:", err)
+		}
+	}
+}
+Neste exemplo:
+ErroDivisaoPorZero é um erro personalizado.
+Usamos if _, ok := err.(ErroDivisaoPorZero); ok para verificar se err é do tipo ErroDivisaoPorZero.
+2. Usando errors.Is (a partir do Go 1.13)
+A partir do Go 1.13, você pode usar a função errors.Is para verificar se um erro é igual a outro erro específico. Isso é especialmente útil para erros padrão ou quando você quer verificar erros encapsulados.
+Exemplo com errors.Is:
+go
+复制
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, errors.New("divisão por zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	_, err := dividir(10, 0)
+	if err != nil {
+		// Verificando se o erro é "divisão por zero"
+		if errors.Is(err, errors.New("divisão por zero")) {
+			fmt.Println("Erro específico: divisão por zero")
+		} else {
+			fmt.Println("Ocorreu um erro não específico:", err)
+		}
+	}
+}
+Neste exemplo:
+Usamos errors.New para criar um erro padrão.
+Usamos errors.Is(err, errors.New("divisão por zero")) para verificar se err é igual ao erro específico.
+3. Usando errors.As (a partir do Go 1.13)
+Se você precisa verificar se um erro é de um tipo específico (por exemplo, um erro personalizado), pode usar errors.As. Isso é útil para erros encapsulados.
+Exemplo com errors.As:
+go
+复制
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// Definindo um erro personalizado
+type ErroDivisaoPorZero struct{}
+
+func (e ErroDivisaoPorZero) Error() string {
+	return "divisão por zero"
+}
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, ErroDivisaoPorZero{}
+	}
+	return a / b, nil
+}
+
+func main() {
+	_, err := dividir(10, 0)
+	if err != nil {
+		// Verificando se o erro é do tipo ErroDivisaoPorZero
+		var e ErroDivisaoPorZero
+		if errors.As(err, &e) {
+			fmt.Println("Erro específico: divisão por zero")
+		} else {
+			fmt.Println("Ocorreu um erro não específico:", err)
+		}
+	}
+}
+Neste exemplo:
+Usamos errors.As(err, &e) para verificar se err é do tipo ErroDivisaoPorZero.
+Resumo
+Afirmação de tipo (type assertion): Útil para tipos de erro personalizados.
+errors.Is: Útil para verificar erros específicos (inclusive erros padrão).
+errors.As: Útil para verificar tipos de erro personalizados, especialmente em erros encapsulados.
+Espero que isso ajude você a entender como verificar tipos de erro em Go!
+
+
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+
+LIDANDO COM ERROS NOS PROGRAMAS:
+
+                                 Tratamento de Erros – 3. Print & Log
+
+
+Opções:
+
+fmt.Println() → stdout  
+
+log.Println() → timestamp  (grava data e hr do erro) + pode-se determinar onde o erro ficará logado.
+
+log.Fatalln() → os.Exit(1) sem defer
+
+log.Panicln() → println + panic → funcões em defer rodam; dá pra usar recover
+
+panic()
+
+
+Recomendação: use log.
+
+
+Código: 
+
+1. fmt.Println - https://go.dev/play/p/909alyJJoUU
+
+2. log.Println - https://go.dev/play/p/ZfW8Jz4moBu
+
+3. log.SetOutput - https://go.dev/play/p/Aoi8kJf6X6T
+
+4. log.Fatalln - https://go.dev/play/p/x4MkD9qKym6   -- tira tomada/err critico
+
+5. log.Panicln - https://go.dev/play/p/GMYWAHMNeWb -- tenho logs, posso usar log.SetOutput para salvar log onde quiser em qualquer writer disponivel que normalmente e um ponteiro quando se cria um file
+
+// panic encerra o programa por partes rodando defer// mas aqui eu tenho a função recover que reassumi o controle do programa
+
+
+6. panic
+
+panic: http://godoc.org/builtin#panic
+
+
+
+
+
+
+Em Go, além de tratar erros de forma explícita, é comum registrar esses erros usando funções de impressão (print) e registro (log). Isso ajuda a monitorar o comportamento do programa e facilita a depuração de problemas. Vamos ver como podemos combinar tratamento de erros com impressão e registro.
+1. Usando fmt.Println e fmt.Printf para impressão de erros
+As funções fmt.Println e fmt.Printf podem ser usadas para imprimir erros diretamente no terminal. Isso é útil para programas simples ou para depuração rápida.
+Exemplo com fmt.Println:
+go
+复制
+package main
+
+import (
+	"fmt"
+)
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, fmt.Errorf("divisão por zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	resultado, err := dividir(10, 0)
+	if err != nil {
+		fmt.Println("Ocorreu um erro:", err)
+		return
+	}
+	fmt.Println("Resultado:", resultado)
+}
+Neste exemplo, fmt.Println é usado para imprimir a mensagem de erro no terminal.
+2. Usando o pacote log para registro de erros
+O pacote log fornece funcionalidades mais avançadas para registrar erros e outras informações. Ele permite definir um prefixo e uma flag de registro, o que ajuda a organizar as mensagens de log.
+Exemplo básico com log:
+go
+复制
+package main
+
+import (
+	"fmt"
+	"log"
+)
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, fmt.Errorf("divisão por zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	log.SetPrefix("ERROR: ")
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
+	resultado, err := dividir(10, 0)
+	if err != nil {
+		log.Println("Ocorreu um erro:", err)
+		return
+	}
+	fmt.Println("Resultado:", resultado)
+}
+Neste exemplo:
+log.SetPrefix define um prefixo para todas as mensagens de log.
+log.SetFlags define as flags de registro, incluindo data, hora e arquivo-fonte.
+log.Println imprime a mensagem de erro com o formato definido.
+3. Registrando erros em um arquivo
+Para programas mais complexos, é útil registrar erros em um arquivo para análise posterior. Isso pode ser feito usando log.New para criar um logger que escreve em um arquivo.
+Exemplo com registro em arquivo:
+go
+复制
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+)
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, fmt.Errorf("divisão por zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	// Criar um arquivo para registro de erros
+	file, err := os.OpenFile("erro.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("Erro ao abrir arquivo de log:", err)
+	}
+	defer file.Close()
+
+	// Criar um logger que escreve no arquivo
+	logger := log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+
+	resultado, err := dividir(10, 0)
+	if err != nil {
+		logger.Println("Ocorreu um erro:", err)
+		return
+	}
+	fmt.Println("Resultado:", resultado)
+}
+Neste exemplo:
+os.OpenFile abre (ou cria) um arquivo para registro de erros.
+log.New cria um logger que escreve no arquivo.
+logger.Println imprime a mensagem de erro no arquivo.
+4. Usando log.Fatalf e log.Panicf
+Para erros críticos que devem interromper o programa, você pode usar log.Fatalf ou log.Panicf. Essas funções imprimem uma mensagem de erro e terminam o programa.
+Exemplo com log.Fatalf:
+go
+复制
+package main
+
+import (
+	"fmt"
+	"log"
+)
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, fmt.Errorf("divisão por zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	resultado, err := dividir(10, 0)
+	if err != nil {
+		log.Fatalf("Ocorreu um erro fatal: %v", err)
+	}
+	fmt.Println("Resultado:", resultado)
+}
+Neste exemplo:
+log.Fatalf imprime a mensagem de erro e termina o programa.
+Melhores práticas
+Use log para erros críticos: Para erros que devem ser registrados e podem interromper o programa, use log.Fatalf ou log.Panicf.
+Registre erros em arquivo: Para programas de produção, registre erros em um arquivo para análise posterior.
+Defina prefixos e flags de log: Use log.SetPrefix e log.SetFlags para organizar suas mensagens de log.
+Evite fmt.Println para erros críticos: Use log para erros que precisam ser registrados formalmente.
+
+
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+                                                 Tratamento de Erros Recover
+
+
+
+ recover, panic e defer - https://go.dev/blog/defer-panic-and-recover
+
+ recover -  https://go.dev/play/p/TSzQjq5GIy1
+
+
+
+Em Go, a função recover é usada para recuperar o controle de uma execução interrompida por uma chamada a panic. O panic é uma função que interrompe a execução normal do programa, e recover permite que você capture esse panic e retome a execução de forma controlada.
+Quando usar recover?
+recover é útil para lidar com erros graves que não podem ser tratados normalmente. Por exemplo, se uma função entra em pânico, você pode usar recover para capturar esse pânico e evitar que o programa termine abruptamente. Isso é especialmente útil em situações onde você precisa garantir que o programa continue executando, mesmo após um erro grave.
+Como usar recover?
+recover só funciona dentro de uma função defer. Quando uma chamada a panic ocorre, a execução normal é interrompida, mas as funções defer ainda são executadas. Se uma dessas funções defer chama recover, a execução do programa é retomada normalmente.
+Exemplo básico com recover:
+go
+复制
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recuperado de um panic:", r)
+		}
+	}()
+
+	// Chamada a uma função que pode entrar em pânico
+	causarPanic()
+	fmt.Println("Esta linha não será executada")
+}
+
+func causarPanic() {
+	panic("Uma situação de pânico ocorreu")
+}
+Neste exemplo:
+A função causarPanic chama panic, o que interrompe a execução normal do programa.
+A função defer é executada, e dentro dela, recover é chamado.
+recover captura o panic e retoma a execução do programa.
+A mensagem "Recuperado de um panic: Uma situação de pânico ocorreu" é impressa.
+Retornando valores após recover
+Se uma função que chamou panic retorna um valor, você pode retornar um valor padrão após capturar o panic com recover.
+Exemplo com retorno de valores:
+go
+复制
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	resultado := funcaoPerigosa()
+	fmt.Println("Resultado:", resultado)
+}
+
+func funcaoPerigosa() (resultado int) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recuperado de um panic:", r)
+			resultado = 42 // Retorno padrão após o panic
+		}
+	}()
+
+	// Chamada a uma função que pode entrar em pânico
+	causarPanic()
+	return 0 // Esta linha não será executada
+}
+
+func causarPanic() {
+	panic("Uma situação de pânico ocorreu")
+}
+Neste exemplo:
+funcaoPerigosa chama causarPanic, que entra em panic.
+A função defer é executada, e recover captura o panic.
+recover define um valor padrão para resultado (42).
+A função funcaoPerigosa retorna o valor padrão (42).
+Quando não usar recover?
+recover deve ser usado com cautela. Ele é útil para lidar com erros graves que não podem ser tratados normalmente, mas não deve ser usado para tratar erros comuns. Erros comuns devem ser tratados usando o mecanismo de erros padrão de Go (retornando um erro).
+Melhores práticas com recover
+Use recover apenas em funções defer: recover só funciona dentro de uma função defer.
+Evite usar recover para erros comuns: Use-o apenas para situações onde o programa deve continuar executando após um erro grave.
+Defina valores padrão após recover: Se a função que chamou panic retorna um valor, defina um valor padrão após capturar o panic.
+
+
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+
+
+
+
+                                         Tratamento de Erros –  Erros com informações adicionais
+
+
+
+
+
+Para que nossas funções retornem erros customizados, podemos utilizar:
+
+return errors.New()
+return fmt.Errorf() ← tem um errors.New() embutido, olha na fonte!
+
+https://golang.org/pkg/builtin/#error
+
+“Error values in Go aren’t special, they are just values like any other, and so you have the entire language at your disposal.” - Rob Pike
+
+Código: 
+
+1. errors.New - https://go.dev/play/p/_VPNIso1uMO
+
+2. var errors.New - https://go.dev/play/p/GnDJCerr8Ko
+
+3. fmt.Errorf - https://go.dev/play/p/sMGjqBdqHhg
+
+4. var fmt.Errorf - https://go.dev/play/p/oxG1NuTZC1C
+
+5. type + method = error interface - erros mais complexos - https://go.dev/play/p/7oNcGNV0Sgx
+tendo o metodo error() dentro de um tipo/type vc tem acesso as outras coisas que tem naquele tipo, assim pode colocar mais informaçoes dentro do erro
+
+
+Em Go, é possível criar erros com informações adicionais para facilitar a depuração e o entendimento do problema. Isso pode ser feito de várias maneiras, incluindo a criação de erros personalizados e o uso de funções para encapsular erros com mais contexto.
+1. Criando erros personalizados
+Você pode criar um tipo de erro personalizado que inclua informações adicionais. Isso é útil quando você precisa de mais detalhes sobre o erro além da mensagem padrão.
+Exemplo de erro personalizado:
+go
+复制
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// Definindo um erro personalizado com informações adicionais
+type ErroDivisaoPorZero struct {
+	Operando float64
+}
+
+func (e ErroDivisaoPorZero) Error() string {
+	return fmt.Sprintf("divisão por zero: operando %.2f", e.Operando)
+}
+
+func dividir(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, ErroDivisaoPorZero{Operando: a}
+	}
+	return a / b, nil
+}
+
+func main() {
+	_, err := dividir(10, 0)
+	if err != nil {
+		fmt.Println("Ocorreu um erro:", err)
+	}
+}
+Neste exemplo:
+ErroDivisaoPorZero é um tipo de erro personalizado que inclui um campo Operando.
+O método Error() é implementado para fornecer uma mensagem de erro com informações adicionais.
+2. Usando fmt.Errorf para adicionar contexto
+A partir do Go 1.13, você pode usar fmt.Errorf com o verbo %w para encapsular erros e adicionar contexto.
+Exemplo com fmt.Errorf e %w:
+go
+复制
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func abrirArquivo(nome string) error {
+	return fmt.Errorf("não foi possível abrir o arquivo %s: %w", nome, errors.New("permissão negada"))
+}
+
+func lerArquivo(nome string) error {
+	err := abrirArquivo(nome)
+	if err != nil {
+		return fmt.Errorf("erro ao ler arquivo %s: %w", nome, err)
+	}
+	return nil
+}
+
+func main() {
+	err := lerArquivo("exemplo.txt")
+	if err != nil {
+		fmt.Println("Ocorreu um erro:", err)
+	}
+}
+Neste exemplo:
+fmt.Errorf é usado para criar um erro com contexto adicional.
+O verbo %w encapsula o erro original, permitindo que você adicione mais informações.
+3. Verificando erros encapsulados
+Quando você encapsula erros usando %w, você pode verificar o erro original usando errors.Is ou errors.As.
+Exemplo com errors.Is e errors.As:
+go
+复制
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func abrirArquivo(nome string) error {
+	return fmt.Errorf("não foi possível abrir o arquivo %s: %w", nome, errors.New("permissão negada"))
+}
+
+func lerArquivo(nome string) error {
+	err := abrirArquivo(nome)
+	if err != nil {
+		return fmt.Errorf("erro ao ler arquivo %s: %w", nome, err)
+	}
+	return nil
+}
+
+func main() {
+	err := lerArquivo("exemplo.txt")
+	if err != nil {
+		fmt.Println("Ocorreu um erro:", err)
+
+		// Verificar se o erro original é "permissão negada"
+		if errors.Is(err, errors.New("permissão negada")) {
+			fmt.Println("Erro específico: permissão negada")
+		}
+
+		// Extrair informações adicionais do erro
+		var arquivoErr string
+		if errors.As(err, &arquivoErr) {
+			fmt.Println("Erro ao abrir arquivo:", arquivoErr)
+		}
+	}
+}
+Neste exemplo:
+errors.Is é usado para verificar se o erro original é "permissão negada".
+errors.As é usado para extrair informações adicionais do erro.
+4. Adicionando contexto com context.Context
+Em situações onde você está lidando com operações assíncronas ou goroutines, pode ser útil adicionar contexto usando context.Context.
+Exemplo com context.Context:
+go
+复制
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+func longRunningOperation(ctx context.Context) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(5 * time.Second):
+		return nil
+	}
+}
+
+func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := longRunningOperation(ctx)
+	if err != nil {
+		fmt.Println("Ocorreu um erro:", err)
+	}
+}
+Neste exemplo:
+context.Context é usado para cancelar uma operação longa se ela exceder um determinado tempo limite.
+ctx.Done() é usado para verificar se o contexto foi cancelado.
+ctx.Err() fornece uma mensagem de erro se o contexto foi cancelado.
+Melhores práticas
+Use erros personalizados para informações adicionais: Quando você precisa de mais detalhes sobre o erro, crie um tipo de erro personalizado.
+Encapsule erros com contexto usando %w: Adicione contexto aos erros usando fmt.Errorf e %w.
+Verifique erros encapsulados com errors.Is e errors.As: Use essas funções para verificar e extrair informações dos erros encapsulados.
+Use context.Context para operações assíncronas: Adicione contexto para lidar com operações que podem ser canceladas.
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+                                                      EXERCíCIOS
+
+
+1- Utilizando este código: https://go.dev/play/p/VE8bLZ7xE9q
+...remova o underscore e verifique e lide com o erro de maneira apropriada, uma solução viável para o erro que ocorrer.
+
+SOLUÇÃO - https://go.dev/play/p/J6QKJNiaSOJ
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+2-  Utilizando este código: https://play.golang.org/p/9a1IAWy5E6
+...crie uma mensagem de erro customizada utilizando 
+
+SOLUÇÃO - https://go.dev/play/p/v2o7o_xNZ3r
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+3- Crie um struct "erroEspecial" que implemente a interface builtin.error. 
+Crie uma função que tenha um valor do tipo error como parâmetro.  // normalmente nao se usa tipo error como parâmetro- aqui so no exercício
+Crie um valor do tipo "erroEspecial" e passe-o para a função da instrução anterior.
+
+SOLUÇAO 1- https://go.dev/play/p/rc1kqajwRsz
+
+SOLUÇAO 2- MAIS DETALHES - https://go.dev/play/p/1ZL7_Bqm5km
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+4- Utilizando este código: https://play.golang.org/p/wlEM1tgfQD
+...use o struct sqrt.Error como valor do tipo erro.
+
+SOLUÇAO -https://go.dev/play/p/Eg4Xd6SjB6x
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+5- Nos capítulos seguintes, uma das coisas que veremos é testes.
+Para testar sua habilidade de se virar por conta própria... desafio:
+Utilizando as seguintes fontes: https://godoc.org/testing & http://www.golang-book.com/books/intr...
+Tente descobrir por conta própria como funcionam testes em Go.
+Pode usar tradutor automático, pode rodar código na sua máquina, pode procurar no Google. Vale tudo.
+O exercício é: crie um teste simples de uma função ou método ou pedaço qualquer de código.
+

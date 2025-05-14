@@ -1,0 +1,146 @@
+
+
+
+
+# TESTES EM GO TEM NOMENCLATURA PADRÃO
+
+# A DIFERENTES TIPOS DE TESTES, TESTES COMPORTAMENTAIS, TESTES UNITÁRIOS E OUTROS
+
+
+
+
+Em Go, os testes são uma parte fundamental do desenvolvimento de software, permitindo que você verifique se seu código
+ funciona corretamente e identifique problemas rapidamente. Aqui está como os testes funcionam em Go:
+Estrutura Básica
+
+Arquivos de Teste:
+
+Os testes em Go são escritos em arquivos com a extensão .go, mas com um nome que termina em _test.go. Por exemplo,
+ se você tem um arquivo main.go, os testes para ele ficariam em main_test.go.
+Esses arquivos devem estar no mesmo pacote que o código que está sendo testado.
+
+Funções de Teste:
+
+Cada função de teste deve começar com o prefixo Test e ter um parâmetro do tipo *testing.T. Por exemplo:
+
+
+func TestMinhaFuncao(t *testing.T) {
+    // código do teste
+}
+
+O pacote testing fornece funcionalidades para executar e verificar os testes.
+
+Execução dos Testes
+
+Para executar os testes, você usa o comando go test no terminal. Por exemplo:
+
+bash
+
+go test -v
+
+A opção -v (verbose) fornece uma saída mais detalhada dos testes.
+
+O comando go test procura automaticamente por funções que começam com Test nos arquivos _test.go e as executa.
+
+Verificação de Resultados
+
+Dentro das funções de teste, você usa métodos como t.Error e t.Fail para indicar falhas no teste.
+
+t.Error registra uma mensagem de erro, mas permite que o teste continue.
+
+t.Fail marca o teste como falho, mas também permite que ele continue.
+
+t.Fatalf registra uma mensagem de erro e interrompe o teste imediatamente.
+
+Exemplo:
+
+
+func TestMinhaFuncao(t *testing.T) {
+    resultado := minhaFuncao(2, 3)
+    if resultado != 5 {
+        t.Errorf("Esperado 5, mas obteve %d", resultado)
+    }
+}
+Subtestes e Tabelas de Teste
+
+Subtestes: Go suporta subtestes, que são úteis para organizar testes relacionados. Você pode criar subtestes usando t.Run:
+
+func TestMinhaFuncao(t *testing.T) {
+    t.Run("Caso 1", func(t *testing.T) {
+        resultado := minhaFuncao(2, 3)
+        if resultado != 5 {
+            t.Errorf("Esperado 5, mas obteve %d", resultado)
+        }
+    })
+    t.Run("Caso 2", func(t *testing.T) {
+        resultado := minhaFuncao(1, 1)
+        if resultado != 2 {
+            t.Errorf("Esperado 2, mas obteve %d", resultado)
+        }
+    })
+}
+
+
+
+
+
+Tabelas de Teste: Para testar várias entradas e saídas, você pode usar uma tabela de testes:
+
+func TestMinhaFuncao(t *testing.T) {
+    testes := []struct {
+        a, b, esperado int
+    }{
+        {2, 3, 5},
+        {1, 1, 2},
+        {0, 0, 0},
+    }
+
+    for _, tt := range testes {
+        t.Run(fmt.Sprintf("a=%d, b=%d", tt.a, tt.b), func(t *testing.T) {
+            resultado := minhaFuncao(tt.a, tt.b)
+            if resultado != tt.esperado {
+                t.Errorf("Esperado %d, mas obteve %d", tt.esperado, resultado)
+            }
+        })
+    }
+}
+
+
+
+
+
+
+Benchmarking
+
+
+Go também suporta benchmarking para medir o desempenho do código. Funções de benchmark começam com Benchmark e
+ usam o tipo *testing.B:
+
+
+
+func BenchmarkMinhaFuncao(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        minhaFuncao(2, 3)
+    }
+}
+
+
+
+Para executar benchmarks, use:
+
+go test -bench=.
+
+Cobertura de Testes
+
+Você pode verificar a cobertura de testes usando:
+
+
+go test -cover
+
+Isso mostra a porcentagem de código que está sendo testado.
+
+Conclusão
+
+Os testes em Go são uma ferramenta poderosa para garantir a qualidade do código. Com uma estrutura simples e
+ recursos como subtestes, tabelas de teste e benchmarking, você pode criar testes eficazes e organizados.
+

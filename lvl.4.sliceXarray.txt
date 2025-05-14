@@ -14,12 +14,12 @@
 
 // slice: fatiando ou deletando uma fatia - https://go.dev/play/p/iMXDWIfjJ9t
 
-// como percorrer os itens dentro de uma slice sem usar o range -https://go.dev/play/p/-WL-fL2OwxC
+// como percorrer os itens dentro de uma slice sem usar o range, so utilizar uma expressao booleana -https://go.dev/play/p/-WL-fL2OwxC 
 
 // aula youtube - https://www.youtube.com/watch?v=G0rxcnojV_U&list=PLCKpcjBB_VlBsxJ9IseNxFllf-UFEXOdg&index=62
 
 
-// deletando um item do slice -  https://go.dev/play/p/cXpzaQq0
+// deletando um item do slice -  https://go.dev/play/p/XpuE87w5N0C
 
 // pode-se unir slices de mesmo tipo - (...) un·furl - 
 

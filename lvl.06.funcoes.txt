@@ -87,16 +87,14 @@ Especificar um receptor (receiver) entre a palavra-chave func e o nome do métod
 
 A sintaxe geral é:
 
-go
-Copy
+
 func (receptor Tipo) NomeDoMetodo(parametros) tipoDeRetorno {
     // Corpo do método
 }
 Exemplo básico
 Aqui está um exemplo simples de um método associado a uma struct:
 
-go
-Copy
+
 package main
 
 import "fmt"
